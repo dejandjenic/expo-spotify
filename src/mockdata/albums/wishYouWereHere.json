@@ -5,10 +5,10 @@
   "released": 1975,
   "title": "Wish You Were Here",
   "tracks": [
-    { "title": "Shine On You Crazy Diamond (Parts I–V)", "seconds": 161 },
-    { "title": "Welcome to the Machine", "seconds": 245 },
-    { "title": "Have a Cigar", "seconds": 288 },
-    { "title": "Wish You Were Here", "seconds": 215 },
-    { "title": "Shine On You Crazy Diamond (Parts VI–IX)", "seconds": 345 }
+    { "title": "Shine On You Crazy Diamond (Parts I–V)", "seconds": 161 , "uri":"https://dejanmusic.blob.core.windows.net/music/tzWd3cVNSC4.mp3" },
+    { "title": "Welcome to the Machine", "seconds": 245 , "uri":"https://dejanmusic.blob.core.windows.net/music/tzWd3cVNSC4.mp3" },
+    { "title": "Have a Cigar", "seconds": 288 , "uri":"https://dejanmusic.blob.core.windows.net/music/tzWd3cVNSC4.mp3" },
+    { "title": "Wish You Were Here", "seconds": 215 , "uri":"https://dejanmusic.blob.core.windows.net/music/tzWd3cVNSC4.mp3" },
+    { "title": "Shine On You Crazy Diamond (Parts VI–IX)", "seconds": 345 , "uri":"https://dejanmusic.blob.core.windows.net/music/tzWd3cVNSC4.mp3" }
   ]
-}
+ }

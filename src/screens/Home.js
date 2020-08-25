@@ -1,5 +1,5 @@
 import React from 'react';
-import { Animated, StyleSheet, View } from 'react-native';
+import { Alert,Button,Animated, StyleSheet, View } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { colors, device, gStyle } from '../constants';
 
@@ -11,6 +11,8 @@ import heavyRotation from '../mockdata/heavyRotation';
 import jumpBackIn from '../mockdata/jumpBackIn';
 import recentlyPlayed from '../mockdata/recentlyPlayed';
 
+
+
 class Home extends React.Component {
   constructor(props) {
     super(props);
@@ -20,7 +22,7 @@ class Home extends React.Component {
     };
   }
 
-  render() {
+  render(){
     const { scrollY } = this.state;
 
     const opacityIn = scrollY.interpolate({
@@ -72,6 +74,7 @@ class Home extends React.Component {
             tagline="Your top listens from the past few months."
           />
         </Animated.ScrollView>
+        <Button title="2-Button Alert" />
       </React.Fragment>
     );
   }

@@ -5,13 +5,14 @@ import { withNavigation } from 'react-navigation';
 import { FontAwesome } from '@expo/vector-icons';
 import { colors, device, gStyle } from '../constants';
 
+
 class BarMusicPlayer extends React.Component {
   constructor(props) {
     super(props);
 
     this.state = {
       favorited: false,
-      paused: true
+      paused: props.screenProps.paused
     };
 
     this.toggleFavorite = this.toggleFavorite.bind(this);
@@ -25,18 +26,77 @@ class BarMusicPlayer extends React.Component {
   }
 
   togglePlay() {
+    console.log("togglePlay")
     this.setState(prev => ({
       paused: !prev.paused
     }));
+this.props.screenProps.onTogglePlay();
+    // if(this.state.paused){
+    //   this.fullfile = this.props.song.uri
+    //   this.loadAudio()
+    // }
+    // else{
+    //   this.state.playbackInstance.stopAsync();
+    // }
   }
 
   render() {
+
+
+    
+
+    const callback = downloadProgress => {
+      const progress = downloadProgress.totalBytesWritten / downloadProgress.totalBytesExpectedToWrite;
+      console.log(progress)
+      this.setState({
+        downloadProgress: progress,
+      });
+    };
+
+
+    const createTwoButtonAlert = async () =>
+    {
+      console.log("2 btn")
+
+      
+      var file = await FileSystem.getInfoAsync(this.fullfile);//.then(tmp => {
+        console.log(file);
+      if(!file.exists){
+        const downloadResumable = FileSystem.createDownloadResumable(
+          'https://dejanmusic.blob.core.windows.net/music/tzWd3cVNSC4.mp3',
+          this.fullfile,
+          {},
+          callback
+        );
+        
+        try {
+          const { uri } = await downloadResumable.downloadAsync();
+          console.log('Finished downloading to ', uri);
+        } catch (e) {
+          console.error(e);
+        } 
+
+
+        
+
+      
+      }
+      this.loadAudio()
+      
+      //console.log(tmp);
+      //}      );
+    };
+
+
     const { navigation, song } = this.props;
-    const { favorited, paused } = this.state;
+    const { favorited, paused2 } = this.state;
+    const paused=this.props.screenProps.paused;
 
     const favoriteColor = favorited ? colors.brandPrimary : colors.white;
     const favoriteIcon = favorited ? 'heart' : 'heart-o';
     const iconPlay = paused ? 'play-circle' : 'pause-circle';
+    //console.log(song)
+    
 
     return (
       <TouchableOpacity

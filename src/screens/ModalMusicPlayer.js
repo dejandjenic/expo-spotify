@@ -14,11 +14,16 @@ class ModalMusicPlayer extends React.Component {
 
     this.state = {
       favorited: false,
-      paused: true
+      paused: this.props.screenProps.paused
     };
 
     this.toggleFavorite = this.toggleFavorite.bind(this);
     this.togglePlay = this.togglePlay.bind(this);
+    this.onSlidingComplete = this.onSlidingComplete.bind(this);
+  }
+
+  onSlidingComplete(e){
+    this.props.screenProps.onSetPos(e);
   }
 
   toggleFavorite() {
@@ -31,6 +36,7 @@ class ModalMusicPlayer extends React.Component {
     this.setState(prev => ({
       paused: !prev.paused
     }));
+    this.props.screenProps.onTogglePlay();
   }
 
   render() {
@@ -44,6 +50,8 @@ class ModalMusicPlayer extends React.Component {
 
     const timePast = func.formatTime(0);
     const timeLeft = func.formatTime(currentSongData.length);
+
+    //console.log(screenProps)
 
     return (
       <View style={gStyle.container}>
@@ -75,9 +83,11 @@ class ModalMusicPlayer extends React.Component {
           <View style={styles.containerVolume}>
             <Slider
               minimumValue={0}
-              maximumValue={currentSongData.length}
+              maximumValue={screenProps.maxPos}
               minimumTrackTintColor={colors.white}
               maximumTrackTintColor={colors.grey3}
+              value = {screenProps.currentPos}
+              onSlidingComplete = {this.onSlidingComplete}
             />
             <View style={styles.containerTime}>
               <Text style={styles.time}>{timePast}</Text>

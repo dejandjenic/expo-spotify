@@ -5,16 +5,16 @@
   "released": 2010,
   "title": "Sea Of Cowards",
   "tracks": [
-    { "title": "Blue Blood Blues", "seconds": 161 },
-    { "title": "Hustle and Cuss", "seconds": 245 },
-    { "title": "The Difference Between Us", "seconds": 288 },
-    { "title": "I'm Mad", "seconds": 215 },
-    { "title": "Die by the Drop", "seconds": 345 },
-    { "title": "I Can't Hear You", "seconds": 250 },
-    { "title": "Gasoline", "seconds": 287 },
-    { "title": "No Horse", "seconds": 271 },
-    { "title": "Looking at the Invisible Man", "seconds": 210 },
-    { "title": "Jawbreaker", "seconds": 237 },
-    { "title": "Old Mary", "seconds": 345 }
+    { "title": "Blue Blood Blues", "seconds": 161 , "uri":"https://dejanmusic.blob.core.windows.net/music/tzWd3cVNSC4.mp3" },
+    { "title": "Hustle and Cuss", "seconds": 245 , "uri":"https://dejanmusic.blob.core.windows.net/music/tzWd3cVNSC4.mp3" },
+    { "title": "The Difference Between Us", "seconds": 288 , "uri":"https://dejanmusic.blob.core.windows.net/music/tzWd3cVNSC4.mp3" },
+    { "title": "I'm Mad", "seconds": 215 , "uri":"https://dejanmusic.blob.core.windows.net/music/tzWd3cVNSC4.mp3" },
+    { "title": "Die by the Drop", "seconds": 345 , "uri":"https://dejanmusic.blob.core.windows.net/music/tzWd3cVNSC4.mp3" },
+    { "title": "I Can't Hear You", "seconds": 250 , "uri":"https://dejanmusic.blob.core.windows.net/music/tzWd3cVNSC4.mp3" },
+    { "title": "Gasoline", "seconds": 287 , "uri":"https://dejanmusic.blob.core.windows.net/music/tzWd3cVNSC4.mp3" },
+    { "title": "No Horse", "seconds": 271 , "uri":"https://dejanmusic.blob.core.windows.net/music/tzWd3cVNSC4.mp3" },
+    { "title": "Looking at the Invisible Man", "seconds": 210 , "uri":"https://dejanmusic.blob.core.windows.net/music/tzWd3cVNSC4.mp3" },
+    { "title": "Jawbreaker", "seconds": 237 , "uri":"https://dejanmusic.blob.core.windows.net/music/tzWd3cVNSC4.mp3" },
+    { "title": "Old Mary", "seconds": 345 , "uri":"https://dejanmusic.blob.core.windows.net/music/tzWd3cVNSC4.mp3" }
   ]
-}
+ }
