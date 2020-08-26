@@ -20,7 +20,7 @@ import TouchIcon from '../components/TouchIcon';
 import TouchText from '../components/TouchText';
 
 // mock data
-import albums from '../mockdata/albums';
+//import albums from '../mockdata/albums';
 
 class Album extends React.Component {
   constructor(props) {
@@ -37,21 +37,52 @@ class Album extends React.Component {
     this.toggleDownloaded = this.toggleDownloaded.bind(this);
     this.changeSong = this.changeSong.bind(this);
     this.toggleBlur = this.toggleBlur.bind(this);
-  }
+    this.performTrackSearch = this.performTrackSearch.bind(this); 
+  } 
 
-  componentDidMount() {
+  async componentDidMount() {
     const { navigation, screenProps } = this.props;
 
     const { currentSongData } = screenProps;
     // const albumTitle = navigation.getParam('title', 'ALBUM NOT FOUND?!');
     const albumTitle = navigation.getParam('title', 'Extraordinary Machine');
+    const albumId = navigation.getParam('id', 'Extraordinary Machine');
+    const lalbum=navigation.getParam('album', 'Extraordinary Machine');
 
     this.setState({
-      album: albums[albumTitle] || null,
+      //album: albums[albumTitle] || null,
+      album:lalbum,
       song: currentSongData.title,
       title: albumTitle
     });
+    console.log("lalbum",lalbum)
+    await this.performTrackSearch(albumId,'')
   }
+
+  async performTrackSearch(id,name){
+ 
+    console.log("performTrackSearch",id)
+    
+    const getMoviesFromApiAsync = async () => {
+      try {
+        //'+this.state.text+'
+        let response = await fetch(
+          'https://musicbrainz.org/ws/2/release/?release-group='+id+'&inc=recordings&fmt=json',{
+            headers:{
+              'User-Agent':'dejan app/1.0.0 (dejandjenic@gmail.com)'
+            }
+          }
+        );
+        let json = await response.json();
+        //console.log("tracks",json)
+        return json;
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    var trackSearchResults=await getMoviesFromApiAsync();
+    this.setState({trackSearchResults})
+      }
 
   toggleDownloaded(val) {
     // if web
@@ -191,7 +222,7 @@ class Album extends React.Component {
           </View>
           <View style={styles.containerAlbum}>
             <Text style={styles.albumInfo}>
-              {`Album by ${album.artist} · ${album.released}`}
+              {`Album by ${album.artist} · ${album['first-release-date']}`}
             </Text>
           </View>
         </View>
@@ -236,8 +267,9 @@ class Album extends React.Component {
               />
             </View>
 
-            {album.tracks &&
-              album.tracks.map((track, index) => (
+            {this.state.trackSearchResults
+            && this.state.trackSearchResults.releases &&
+              this.state.trackSearchResults.releases[0].media[0].tracks.map((track, index) => (
                 <LineItemSong
                   active={song === track.title}
                   downloaded={downloaded}
@@ -246,10 +278,10 @@ class Album extends React.Component {
                   songData={{
                     album: album.title,
                     artist: album.artist,
-                    image: album.image,
-                    length: track.seconds,
+                    image: 'album.image',
+                    length: track.length / 1000,
                     title: track.title,
-                    uri:track.uri
+                    uri:track.id
                   }}
                 />
               ))}

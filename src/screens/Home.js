@@ -74,7 +74,7 @@ class Home extends React.Component {
             tagline="Your top listens from the past few months."
           />
         </Animated.ScrollView>
-        <Button title="2-Button Alert" />
+        
       </React.Fragment>
     );
   }
