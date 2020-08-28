@@ -37,8 +37,9 @@ class Album extends React.Component {
     this.toggleDownloaded = this.toggleDownloaded.bind(this);
     this.changeSong = this.changeSong.bind(this);
     this.toggleBlur = this.toggleBlur.bind(this);
-    this.performTrackSearch = this.performTrackSearch.bind(this); 
-  } 
+    this.performTrackSearch = this.performTrackSearch.bind(this);
+    this.itemDownload = this.itemDownload.bind(this);
+  }
 
   async componentDidMount() {
     const { navigation, screenProps } = this.props;
@@ -47,31 +48,37 @@ class Album extends React.Component {
     // const albumTitle = navigation.getParam('title', 'ALBUM NOT FOUND?!');
     const albumTitle = navigation.getParam('title', 'Extraordinary Machine');
     const albumId = navigation.getParam('id', 'Extraordinary Machine');
-    const lalbum=navigation.getParam('album', 'Extraordinary Machine');
+    const lalbum = navigation.getParam('album', 'Extraordinary Machine');
 
     this.setState({
       //album: albums[albumTitle] || null,
-      album:lalbum,
+      album: lalbum,
       song: currentSongData.title,
       title: albumTitle
     });
-    console.log("lalbum",lalbum)
-    await this.performTrackSearch(albumId,'')
+    console.log("lalbum", lalbum)
+
+    await this.performTrackSearch(albumId, '')
   }
 
-  async performTrackSearch(id,name){
- 
-    console.log("performTrackSearch",id)
-    
+  async itemDownload(id,pdownload){
+    console.log("itemDownload")
+    this.props.screenProps.onDownload(this.state.trackSearchResults.releases[0].media[0].tracks.filter((item)=>item.id == id),pdownload);
+  }
+
+  async performTrackSearch(id, name) {
+
+    console.log("performTrackSearch", id)
+
     const getMoviesFromApiAsync = async () => {
       try {
         //'+this.state.text+'
         let response = await fetch(
-          'https://musicbrainz.org/ws/2/release/?release-group='+id+'&inc=recordings&fmt=json',{
-            headers:{
-              'User-Agent':'dejan app/1.0.0 (dejandjenic@gmail.com)'
-            }
+          'https://musicbrainz.org/ws/2/release/?release-group=' + id + '&inc=recordings&fmt=json', {
+          headers: {
+            'User-Agent': 'dejan app/1.0.0 (dejandjenic@gmail.com)'
           }
+        }
         );
         let json = await response.json();
         //console.log("tracks",json)
@@ -80,9 +87,25 @@ class Album extends React.Component {
         console.log(error);
       }
     };
-    var trackSearchResults=await getMoviesFromApiAsync();
-    this.setState({trackSearchResults})
-      }
+    var trackSearchResults = await getMoviesFromApiAsync();
+    this.setState({ trackSearchResults })
+
+var fromcache=     trackSearchResults.releases[0].media[0].tracks.filter((item) =>
+     this.props.screenProps.localCache.find((x) => x.data.id == item.id) != null
+   );
+
+   //console.log(this.state.trackSearchResults.releases[0].media[0].tracks.map((item)=>item.id));
+   //console.log(this.props.screenProps.localCache);
+   //console.log(fromcache);
+  //  console.log(trackSearchResults.releases[0].media[0].tracks.filter((item)=>true).length)
+  //  console.log(trackSearchResults.releases[0].media[0].tracks.lenght)
+  //  console.log(fromcache.length)
+    if (trackSearchResults.releases[0].media[0].tracks.filter((item)=>true).length ==
+      fromcache.length
+    ) {
+      this.setState({ downloaded: true });
+    }
+  }
 
   toggleDownloaded(val) {
     // if web
@@ -116,6 +139,7 @@ class Album extends React.Component {
       this.setState({
         downloaded: val
       });
+      this.props.screenProps.onDownload(this.state.trackSearchResults.releases[0].media[0].tracks,true);
     }
   }
 
@@ -268,20 +292,21 @@ class Album extends React.Component {
             </View>
 
             {this.state.trackSearchResults
-            && this.state.trackSearchResults.releases &&
+              && this.state.trackSearchResults.releases &&
               this.state.trackSearchResults.releases[0].media[0].tracks.map((track, index) => (
                 <LineItemSong
                   active={song === track.title}
-                  downloaded={downloaded}
+                  downloaded={this.props.screenProps.localCache.find((x) => x.data.id == track.id) != null}
                   key={index.toString()}
                   onPress={this.changeSong}
+                  onDownload = {this.itemDownload}
                   songData={{
                     album: album.title,
                     artist: album.artist,
                     image: 'album.image',
                     length: track.length / 1000,
                     title: track.title,
-                    uri:track.id
+                    uri: track.id
                   }}
                 />
               ))}

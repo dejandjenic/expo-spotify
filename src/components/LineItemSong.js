@@ -1,10 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Switch,StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Feather, Ionicons } from '@expo/vector-icons';
 import { colors, gStyle } from '../constants';
 
-const LineItemSong = ({ active, downloaded, onPress, songData }) => (
+const LineItemSong = ({ active, downloaded, onPress, songData,onDownload }) => (
   <View style={styles.container}>
     <TouchableOpacity
       activeOpacity={gStyle.activeOpacity}
@@ -34,7 +34,12 @@ const LineItemSong = ({ active, downloaded, onPress, songData }) => (
     </TouchableOpacity>
 
     <View style={styles.containerRight}>
-      <Feather color={colors.greyLight} name="more-horizontal" size={20} />
+    <Switch
+                trackColor={colors.greySwitchBorder}
+                onValueChange={val => onDownload(songData.uri,!downloaded)}
+                value={downloaded}
+              />
+      {/* <Feather color={colors.greyLight} name="more-horizontal" size={20} /> */}
     </View>
   </View>
 );
