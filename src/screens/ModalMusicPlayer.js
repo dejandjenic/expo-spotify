@@ -30,6 +30,8 @@ class ModalMusicPlayer extends React.Component {
     this.setState(prev => ({
       favorited: !prev.favorited
     }));
+
+    this.props.screenProps.onFavorite(this.props.screenProps.currentSongData.id,this.state.favorited);
   }
 
   togglePlay() {
@@ -42,7 +44,8 @@ class ModalMusicPlayer extends React.Component {
   render() {
     const { navigation, screenProps } = this.props;
     const { currentSongData } = screenProps;
-    const { favorited, paused } = this.state;
+    const { paused } = this.state;
+    let favorited=this.props.screenProps.favorites.find((x)=> x == currentSongData.id)!=null;
 
     const favoriteColor = favorited ? colors.brandPrimary : colors.white;
     const favoriteIcon = favorited ? 'heart' : 'heart-o';

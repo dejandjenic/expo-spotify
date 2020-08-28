@@ -16,14 +16,17 @@ export default class App extends React.Component {
     super(props);
 
     this.state = {
-      currentSongData: {
-        album: 'Swimming',
-        artist: 'Mac Miller',
-        image: 'swimming',
-        length: 312,
-        title: 'So It Goes',
-        uri: "https://dejanmusic.blob.core.windows.net/music/tzWd3cVNSC4.mp3"
-      },
+       currentSongData: 
+       //{
+      //   album: 'Swimming',
+      //   artist: 'Mac Miller',
+      //   image: 'swimming',
+      //   length: 312,
+      //   title: 'So It Goes',
+      //   uri: "https://dejanmusic.blob.core.windows.net/music/tzWd3cVNSC4.mp3",
+      //   id:"12"
+      // }
+      null,
       isLoading: true,
       toggleTabBar: false,
       playbackInstance: new Audio.Sound(),
@@ -33,7 +36,9 @@ export default class App extends React.Component {
       maxpos: 1000,
       currentPos: 0,
       isSongLoading: false,
-      localCache: []
+      localCache: [],
+      favorites: [],
+      shuffle:true
     };
 
     this.changeSong = this.changeSong.bind(this);
@@ -42,6 +47,7 @@ export default class App extends React.Component {
     this.onSetPos = this.onSetPos.bind(this);
     this.findurl = this.findurl.bind(this);
     this.onDownload = this.onDownload.bind(this);
+    this.onFavorite = this.onFavorite.bind(this);
   }
 
   async componentDidMount() {
@@ -66,7 +72,20 @@ export default class App extends React.Component {
 
       var lcs = await FileSystem.readAsStringAsync(lcsPath);
       var localCache = JSON.parse(lcs)
-      this.setState({ localCache })
+
+
+      var fPath = FileSystem.documentDirectory + "favorites.json";
+
+      var fif = await FileSystem.getInfoAsync(fPath);
+      if (!fif.exists) {
+        await FileSystem.writeAsStringAsync(fPath, "[]");
+      }
+
+      var f = await FileSystem.readAsStringAsync(fPath);
+      var favorites = JSON.parse(f)
+
+
+      this.setState({ localCache, favorites })
 
     } catch (e) {
       console.log(e)
@@ -78,6 +97,28 @@ export default class App extends React.Component {
   }
 
 
+  async onFavorite(id, add) {
+    console.log("onFavorite", id, add)
+    
+    let { favorites } = this.state;
+    console.log("onFavorite", favorites)
+
+    if(add){
+      favorites.push(id);
+      await this.setState({ favorites }) 
+    }
+    else {
+      if (favorites.find((x) => x == id) != null) {
+        favorites = favorites.filter((x) => x != id);
+      }
+    }
+    console.log("onFavorite", favorites)
+this.setState({favorites})
+    var fPath = FileSystem.documentDirectory + "favorites.json";
+
+    await FileSystem.writeAsStringAsync(fPath, JSON.stringify(favorites));
+
+  }
 
   async onDownload(data, download) {
 
@@ -87,12 +128,12 @@ export default class App extends React.Component {
       console.log(progress)
       this.setState({
         downloadProgress: progress,
-      });
+      }); 
     };
 
     var localCache = this.state.localCache;
     this.setState({ isSongLoading: true });
-    //console.log("ondownload",data);
+    console.log("ondownload",data);
 
     for (let item of data) {
       //console.log(item)
@@ -100,25 +141,28 @@ export default class App extends React.Component {
         if (localCache.find((x) => x.data.id == item.id) == null) {
 
           var uri = await this.findurl(item.id, item.title);
-          var localfile = FileSystem.documentDirectory + item.id + ".mp3";
+          if (url != null) {
 
-          const downloadResumable = FileSystem.createDownloadResumable(
-            uri,
-            localfile,
-            {},
-            callback
-          );
+            var localfile = FileSystem.documentDirectory + item.id + ".mp3";
 
-          try {
-            const { uri } = await downloadResumable.downloadAsync();
-            console.log('Finished downloading to ', uri);
-          } catch (e) {
-            console.error(e);
+            const downloadResumable = FileSystem.createDownloadResumable(
+              uri,
+              localfile,
+              {},
+              callback
+            );
+
+            try {
+              const { uri } = await downloadResumable.downloadAsync();
+              console.log('Finished downloading to ', uri);
+            } catch (e) {
+              console.error(e);
+            }
+
+
+
+            localCache.push({ data: item, uri: uri, path: localfile })
           }
-
-
-
-          localCache.push({ data: item, uri: uri, path: localfile })
         }
       }
       else {
@@ -170,7 +214,7 @@ export default class App extends React.Component {
       this.state.playbackInstance.setOnPlaybackStatusUpdate(this.onPlaybackStatusUpdate)
       await this.state.playbackInstance.loadAsync(this.state.currentSongData, status, false)
       //this.setState({playbackInstance})
-      this.setState({ issoundloaded: true })
+      this.setState({ issoundloaded: true,ispaused:false })
       console.log("sound loaded");
     } catch (e) {
       console.log(e)
@@ -204,7 +248,14 @@ export default class App extends React.Component {
     }
   }
 
+
   onPlaybackStatusUpdate = status => {
+
+    
+   const getRandomInt= (max)=> {
+    return Math.floor(Math.random() * Math.floor(max));
+  }
+
     this.setState({
       isBuffering: status.isBuffering,
       maxpos: status.durationMillis / 1000,
@@ -213,7 +264,22 @@ export default class App extends React.Component {
     //console.log("status", status)
 
     if (status.didJustFinish) {
-      this.setState({ ispaused: true })
+      this.setState({currentPos:0,maxpos:1000,currentPos:0});
+      if(this.state.shuffle){
+        var next = getRandomInt(this.state.tracks.length-1)
+        console.log("tracks",this.state.tracks,next)
+        
+        this.changeSong(this.state.tracks[next],this.state.tracks);
+      }
+      else{
+          var next = this.state.tracks.findIndex((item)=> item.id == this.state.currentSongData.id);
+          next++;
+          if(next >= this.state.tracks.length){
+            next=0;
+          }
+          this.changeSong(this.state.tracks[next],this.state.tracks);
+      }
+      //this.setState({ ispaused: true }) 
     }
   }
 
@@ -224,10 +290,10 @@ export default class App extends React.Component {
     }));
   }
 
-  async changeSong(data) {
+  async changeSong(data,tracks) {
 
-    console.log(data)
-    this.setState({ isSongLoading: true })
+    console.log("data,tracks",data,tracks)
+    this.setState({ isSongLoading: true,tracks:tracks })
     var uri = ""
     if (this.state.localCache.find((x) => x.data.id == data.uri) != null) {
       uri = this.state.localCache.find((x) => x.data.id == data.uri).path;
@@ -236,17 +302,18 @@ export default class App extends React.Component {
       uri = await this.findurl(data.uri, data.title);
     }
 
-
+    console.log("song data", data);
     console.log("song uri", uri);
-    var xxx = { ...data, uri: uri }
-    console.log("xxx",xxx)
+    var id = data.uri;
+    var xxx = { ...data, uri: uri,id:id }
+    console.log("xxx", xxx)
     await this.setState({
       currentSongData: xxx,
       isSongLoading: false
     });
 
 
-console.log("currentSongData",this.state.currentSongData)
+    console.log("currentSongData", this.state.currentSongData)
     await this.loadAudio()
   }
 
@@ -272,7 +339,12 @@ console.log("currentSongData",this.state.currentSongData)
       }
     };
     var searchResults = await getMoviesFromApiAsync(id, title);
-    return searchResults.uri;
+    if (searchResults) {
+      return searchResults.uri;
+    }
+    else {
+      return null;
+    }
 
   }
 
@@ -309,7 +381,9 @@ console.log("currentSongData",this.state.currentSongData)
             maxPos: this.state.maxpos,
             onSetPos: this.onSetPos,
             onDownload: this.onDownload,
-            localCache: this.state.localCache
+            localCache: this.state.localCache,
+            onFavorite: this.onFavorite,
+            favorites: this.state.favorites
           }}
         />
       </React.Fragment>

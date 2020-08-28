@@ -53,7 +53,7 @@ class Album extends React.Component {
     this.setState({
       //album: albums[albumTitle] || null,
       album: lalbum,
-      song: currentSongData.title,
+      song: currentSongData?currentSongData.title:"",
       title: albumTitle
     });
     console.log("lalbum", lalbum)
@@ -148,7 +148,19 @@ var fromcache=     trackSearchResults.releases[0].media[0].tracks.filter((item) 
       screenProps: { changeSong }
     } = this.props;
 
-    changeSong(songData);
+    changeSong(songData,
+      this.state.trackSearchResults.releases[0].media[0].tracks
+      .map((track)=>
+        ({
+          album: 'album.title',
+          artist: 'album.artist',
+          image: 'album.image',
+          length: track.length / 1000,
+          title: track.title,
+          uri: track.id
+        })
+        )
+      );
 
     this.setState({
       song: songData.title
@@ -300,6 +312,8 @@ var fromcache=     trackSearchResults.releases[0].media[0].tracks.filter((item) 
                   key={index.toString()}
                   onPress={this.changeSong}
                   onDownload = {this.itemDownload}
+                  isfavorite={this.props.screenProps.favorites.find((x)=> x == track.id)!=null}
+                  onfav={this.props.screenProps.onFavorite}
                   songData={{
                     album: album.title,
                     artist: album.artist,

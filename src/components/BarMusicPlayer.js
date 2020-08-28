@@ -23,6 +23,9 @@ class BarMusicPlayer extends React.Component {
     this.setState(prev => ({
       favorited: !prev.favorited
     }));
+if(this.props.song){
+    this.props.screenProps.onFavorite(this.props.song.id,this.state.favorited);
+}
   }
 
   togglePlay() {
@@ -89,13 +92,40 @@ this.props.screenProps.onTogglePlay();
 
 
     const { navigation, song } = this.props;
-    const { favorited, paused2 } = this.state;
+    const { paused2 } = this.state;
+    let favorited=this.props.song!=null?
+    this.props.screenProps.favorites.find((x)=> x == this.props.song.id)!=null
+    :false;
     const paused=this.props.screenProps.paused;
 
     const favoriteColor = favorited ? colors.brandPrimary : colors.white;
     const favoriteIcon = favorited ? 'heart' : 'heart-o';
     const iconPlay = paused ? 'play-circle' : 'pause-circle';
     //console.log(song)
+
+    let fbtn =  <TouchableOpacity
+          activeOpacity={gStyle.activeOpacity}
+          hitSlop={{ bottom: 10, left: 10, right: 10, top: 10 }}
+          onPress={this.toggleFavorite}
+          style={styles.containerIcon}
+        >
+          <FontAwesome color={favoriteColor} name={favoriteIcon} size={20} />
+        </TouchableOpacity>
+
+
+let pbtn=<TouchableOpacity
+activeOpacity={gStyle.activeOpacity}
+hitSlop={{ bottom: 10, left: 10, right: 10, top: 10 }}
+onPress={this.togglePlay}
+style={styles.containerIcon}
+>
+<FontAwesome color={colors.white} name={iconPlay} size={28} />
+</TouchableOpacity>
+
+        if(!song){
+fbtn=null;
+pbtn=null;
+        }
     
 
     return (
@@ -104,14 +134,7 @@ this.props.screenProps.onTogglePlay();
         onPress={() => navigation.navigate('ModalMusicPlayer')}
         style={styles.container}
       >
-        <TouchableOpacity
-          activeOpacity={gStyle.activeOpacity}
-          hitSlop={{ bottom: 10, left: 10, right: 10, top: 10 }}
-          onPress={this.toggleFavorite}
-          style={styles.containerIcon}
-        >
-          <FontAwesome color={favoriteColor} name={favoriteIcon} size={20} />
-        </TouchableOpacity>
+       {fbtn}
         {song && (
           <View>
             <View style={styles.containerSong}>
@@ -128,14 +151,7 @@ this.props.screenProps.onTogglePlay();
             </View>
           </View>
         )}
-        <TouchableOpacity
-          activeOpacity={gStyle.activeOpacity}
-          hitSlop={{ bottom: 10, left: 10, right: 10, top: 10 }}
-          onPress={this.togglePlay}
-          style={styles.containerIcon}
-        >
-          <FontAwesome color={colors.white} name={iconPlay} size={28} />
-        </TouchableOpacity>
+        {pbtn}
       </TouchableOpacity>
     );
   }

@@ -1,16 +1,28 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { View,StyleSheet, Text, TouchableOpacity } from 'react-native';
 import { colors, gStyle } from '../constants';
+import { FontAwesome } from '@expo/vector-icons';
 
-const PlaylistItem = ({ bgColor, onPress, title }) => (
+const PlaylistItem = ({ bgColor, onPress, title,isfavorite,onfav,xid }) => (
+  <View 
+  style={[styles.playlistItem, { backgroundColor: bgColor }]}
+  >
   <TouchableOpacity
     activeOpacity={gStyle.activeOpacity}
     onPress={onPress}
-    style={[styles.playlistItem, { backgroundColor: bgColor }]}
+    
   >
     <Text style={styles.playlistTitle}>{title}</Text>
   </TouchableOpacity>
+  <TouchableOpacity
+          activeOpacity={gStyle.activeOpacity}
+          onPress={()=> onfav(xid,!isfavorite)}
+          style={styles.containerIcon}
+        >
+          <FontAwesome color={colors.brandPrimary} name={isfavorite ? 'heart' : 'heart-o'} size={20} />
+        </TouchableOpacity>
+  </View>
 );
 
 PlaylistItem.propTypes = {

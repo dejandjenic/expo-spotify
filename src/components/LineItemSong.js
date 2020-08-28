@@ -3,8 +3,9 @@ import PropTypes from 'prop-types';
 import { Switch,StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Feather, Ionicons } from '@expo/vector-icons';
 import { colors, gStyle } from '../constants';
+import { FontAwesome } from '@expo/vector-icons';
 
-const LineItemSong = ({ active, downloaded, onPress, songData,onDownload }) => (
+const LineItemSong = ({ active, downloaded, onPress, songData,onDownload ,isfavorite,onfav}) => (
   <View style={styles.container}>
     <TouchableOpacity
       activeOpacity={gStyle.activeOpacity}
@@ -40,6 +41,14 @@ const LineItemSong = ({ active, downloaded, onPress, songData,onDownload }) => (
                 value={downloaded}
               />
       {/* <Feather color={colors.greyLight} name="more-horizontal" size={20} /> */}
+      </View><View style={styles.containerRight}>
+      <TouchableOpacity
+          activeOpacity={gStyle.activeOpacity}
+          onPress={()=> onfav(songData.uri,!isfavorite)}
+          style={styles.containerIcon}
+        >
+          <FontAwesome color={colors.brandPrimary} name={isfavorite ? 'heart' : 'heart-o'} size={20} />
+        </TouchableOpacity>
     </View>
   </View>
 );

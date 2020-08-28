@@ -7,7 +7,7 @@ import { FontAwesome } from '@expo/vector-icons';
 
 import { withNavigation } from 'react-navigation';
 
-const LineItemAlbum = ({ active, downloaded, onPress, albumData,onPress2,navigation }) => (
+const LineItemAlbum = ({ active, downloaded, onPress, albumData,onPress2,navigation,isfavorite,onfav }) => (
 
   
   <View style={styles.container}>
@@ -42,10 +42,10 @@ const LineItemAlbum = ({ active, downloaded, onPress, albumData,onPress2,navigat
     <View style={styles.containerRight}>
     <TouchableOpacity
           activeOpacity={gStyle.activeOpacity}
-          onPress={onPress2}
+          onPress={()=> onfav(albumData.id,!isfavorite)}
           style={styles.containerIcon}
         >
-          <FontAwesome color={colors.brandPrimary} name='heart' size={20} />
+          <FontAwesome color={colors.brandPrimary} name={isfavorite ? 'heart' : 'heart-o'} size={20} />
         </TouchableOpacity>
     </View>
   </View>
