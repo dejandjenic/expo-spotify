@@ -155,7 +155,7 @@ class Search extends React.Component {
                 bgColor={colors.grey}
                 onPress={() => this.performAlbumSearch(item.id, item.name)}
                 title={item.name}
-                isfavorite={this.props.screenProps.favorites.find((x) => x == item.id) != null}
+                isfavorite={this.props.screenProps.favorites.find((x) => x.id == item.id) != null}
                 onfav={this.props.screenProps.onFavorite}
                 xid={item.id}
               />
@@ -195,7 +195,7 @@ class Search extends React.Component {
               onPress={() => this.performTrackSearch(item.id, item.title)}
               onPress2={() => console.log("sdf")}
               albumData={{ ...item, artist: this.state.selectedArtist.name }}
-              isfavorite={this.props.screenProps.favorites.find((x) => x == item.id) != null}
+              isfavorite={this.props.screenProps.favorites.find((x) => x.id == item.id) != null}
               onfav={this.props.screenProps.onFavorite}
             />
           );

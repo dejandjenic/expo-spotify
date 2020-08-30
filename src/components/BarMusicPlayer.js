@@ -24,7 +24,7 @@ class BarMusicPlayer extends React.Component {
       favorited: !prev.favorited
     }));
 if(this.props.song){
-    this.props.screenProps.onFavorite(this.props.song.id,this.state.favorited);
+    this.props.screenProps.onFavorite(this.props.song.id,this.state.favorited,'song',this.props.song);
 }
   }
 
@@ -94,7 +94,7 @@ this.props.screenProps.onTogglePlay();
     const { navigation, song } = this.props;
     const { paused2 } = this.state;
     let favorited=this.props.song!=null?
-    this.props.screenProps.favorites.find((x)=> x == this.props.song.id)!=null
+    this.props.screenProps.favorites.find((x)=> x.id == this.props.song.id)!=null
     :false;
     const paused=this.props.screenProps.paused;
 

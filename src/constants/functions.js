@@ -54,6 +54,10 @@ const cameraAccessAsync = async () => {
 // format seconds
 // /////////////////////////////////////////////////////////////////////////////
 const formatTime = sec => {
+  if(sec<0)
+  {
+    return '0:00';
+  }
   const padTime = (num, size) => `000${num}`.slice(size * -1);
   const time = parseFloat(sec).toFixed(3);
   const minutes = Math.floor(time / 60) % 60;

@@ -39,6 +39,7 @@ class Album extends React.Component {
     this.toggleBlur = this.toggleBlur.bind(this);
     this.performTrackSearch = this.performTrackSearch.bind(this);
     this.itemDownload = this.itemDownload.bind(this);
+    this.shufflePlay = this.shufflePlay.bind(this);
   }
 
   async componentDidMount() {
@@ -49,16 +50,47 @@ class Album extends React.Component {
     const albumTitle = navigation.getParam('title', 'Extraordinary Machine');
     const albumId = navigation.getParam('id', 'Extraordinary Machine');
     const lalbum = navigation.getParam('album', 'Extraordinary Machine');
+    const loadFromUri = navigation.getParam('loadFromUri', true);
+    const results = navigation.getParam('results', []);
+    const songtoplay = navigation.getParam('songtoplay', null);
 
     this.setState({
       //album: albums[albumTitle] || null,
       album: lalbum,
       song: currentSongData?currentSongData.title:"",
-      title: albumTitle
+      title: albumTitle,
+      songtoplay:songtoplay
     });
-    console.log("lalbum", lalbum)
-
+    //console.log("lalbum", lalbum)
+if(loadFromUri){
     await this.performTrackSearch(albumId, '')
+}
+else{
+  
+  //console.log("local album",lalbum,results)
+  var trackSearchResults={releases:[
+    {
+      media:[
+        {
+          tracks:[]
+        }
+      ]
+    }
+  ]};
+  
+  trackSearchResults.releases[0].media[0].tracks=results
+  .map(x=>
+    ({...x.data,id:x.id})
+    );
+
+    await this.setState({trackSearchResults})
+
+if(songtoplay){
+    console.log("songtoplay",songtoplay,trackSearchResults.releases[0].media[0].tracks.find(x=>x.id==songtoplay))
+
+this.changeSong(trackSearchResults.releases[0].media[0].tracks.find(x=>x.id==songtoplay))
+}
+}
   }
 
   async itemDownload(id,pdownload){
@@ -143,6 +175,25 @@ var fromcache=     trackSearchResults.releases[0].media[0].tracks.filter((item) 
     }
   }
 
+  shufflePlay (){
+console.log("shufflePlay",this.state.trackSearchResults.releases[0].media[0].tracks,this.state.album)
+this.props.screenProps.setTrack(
+
+  this.state.trackSearchResults.releases[0].media[0].tracks
+      .map((track)=>
+        ({
+          album: this.state.album.title,
+          artist: this.state.album.artist,
+          image: 'album.image',
+          length: track.length / 1000,
+          title: track.title,
+          uri: track.id
+        })
+        )
+
+)
+  }
+
   changeSong(songData) {
     const {
       screenProps: { changeSong }
@@ -152,8 +203,8 @@ var fromcache=     trackSearchResults.releases[0].media[0].tracks.filter((item) 
       this.state.trackSearchResults.releases[0].media[0].tracks
       .map((track)=>
         ({
-          album: 'album.title',
-          artist: 'album.artist',
+          album: this.state.album.title,
+          artist: this.state.album.artist,
           image: 'album.image',
           length: track.length / 1000,
           title: track.title,
@@ -284,7 +335,7 @@ var fromcache=     trackSearchResults.releases[0].media[0].tracks.filter((item) 
             </Animated.View>
             <View style={styles.containerShuffle}>
               <TouchText
-                onPress={() => null}
+                onPress={this.shufflePlay}
                 style={styles.btn}
                 styleText={styles.btnText}
                 text="Shuffle Play"
@@ -307,12 +358,12 @@ var fromcache=     trackSearchResults.releases[0].media[0].tracks.filter((item) 
               && this.state.trackSearchResults.releases &&
               this.state.trackSearchResults.releases[0].media[0].tracks.map((track, index) => (
                 <LineItemSong
-                  active={song === track.title}
+                  active={this.props.screenProps.currentSongData && this.props.screenProps.currentSongData.title === track.title}
                   downloaded={this.props.screenProps.localCache.find((x) => x.data.id == track.id) != null}
                   key={index.toString()}
                   onPress={this.changeSong}
                   onDownload = {this.itemDownload}
-                  isfavorite={this.props.screenProps.favorites.find((x)=> x == track.id)!=null}
+                  isfavorite={this.props.screenProps.favorites.find((x)=> x.id == track.id)!=null}
                   onfav={this.props.screenProps.onFavorite}
                   songData={{
                     album: album.title,

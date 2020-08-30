@@ -1,7 +1,7 @@
 import React from 'react';
 import { FlatList, StyleSheet, View } from 'react-native';
 import { device, gStyle } from '../constants';
-
+import { withNavigation } from 'react-navigation';
 // components
 import LineItemCategory from '../components/LineItemCategory';
 import ScreenHeader from '../components/ScreenHeader';
@@ -9,7 +9,7 @@ import ScreenHeader from '../components/ScreenHeader';
 // mock data
 import yourLibrary from '../mockdata/menuYourLibrary';
 
-const Library = () => (
+const Library = ({navigation}) => (
   <View style={gStyle.container}>
     <View style={{ position: 'absolute', top: 0, width: '100%', zIndex: 10 }}>
       <ScreenHeader title="You Library" />
@@ -22,7 +22,7 @@ const Library = () => (
       renderItem={({ item }) => (
         <LineItemCategory
           icon={item.icon}
-          onPress={() => null}
+          onPress={() => navigation.navigate('ModalFavorites',{type:item.type})}
           title={item.title}
         />
       )}
@@ -36,4 +36,4 @@ const styles = StyleSheet.create({
   }
 });
 
-export default Library;
+export default withNavigation(Library);

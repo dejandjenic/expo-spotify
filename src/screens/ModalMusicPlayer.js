@@ -31,7 +31,7 @@ class ModalMusicPlayer extends React.Component {
       favorited: !prev.favorited
     }));
 
-    this.props.screenProps.onFavorite(this.props.screenProps.currentSongData.id,this.state.favorited);
+    this.props.screenProps.onFavorite(this.props.screenProps.currentSongData.id,this.state.favorited,'album',this.props.screenProps.currentSongData);
   }
 
   togglePlay() {
@@ -45,14 +45,14 @@ class ModalMusicPlayer extends React.Component {
     const { navigation, screenProps } = this.props;
     const { currentSongData } = screenProps;
     const { paused } = this.state;
-    let favorited=this.props.screenProps.favorites.find((x)=> x == currentSongData.id)!=null;
+    let favorited=this.props.screenProps.favorites.find((x)=> x.id == currentSongData.id)!=null;
 
     const favoriteColor = favorited ? colors.brandPrimary : colors.white;
     const favoriteIcon = favorited ? 'heart' : 'heart-o';
     const iconPlay = paused ? 'play-circle' : 'pause-circle';
 
     const timePast = func.formatTime(0);
-    const timeLeft = func.formatTime(currentSongData.length);
+    const timeLeft = func.formatTime(currentSongData.length-(screenProps.currentPos && !isNaN(screenProps.currentPos)?screenProps.currentPos:0));
 
     //console.log(screenProps)
 
@@ -86,10 +86,10 @@ class ModalMusicPlayer extends React.Component {
           <View style={styles.containerVolume}>
             <Slider
               minimumValue={0}
-              maximumValue={screenProps.maxPos}
+              maximumValue={screenProps.maxPos && !isNaN(screenProps.maxPos)?screenProps.maxPos:10000}
               minimumTrackTintColor={colors.white}
               maximumTrackTintColor={colors.grey3}
-              value = {screenProps.currentPos}
+              value = {screenProps.currentPos && !isNaN(screenProps.currentPos)?screenProps.currentPos:0}
               onSlidingComplete = {this.onSlidingComplete}
             />
             <View style={styles.containerTime}>
@@ -100,14 +100,14 @@ class ModalMusicPlayer extends React.Component {
 
           <View style={styles.containerControls}>
             <TouchIcon
-              icon={<Feather color={colors.greyLight} name="shuffle" />}
-              onPress={() => null}
+              icon={<Feather color={this.props.screenProps.shuffle?colors.brandPrimary:colors.greyLight} name="shuffle" />}
+              onPress={() => this.props.screenProps.onChangeShuffle(!this.props.screenProps.shuffle)}
             />
             <View style={gStyle.flexRowCenterAlign}>
               <TouchIcon
                 icon={<FontAwesome color={colors.white} name="step-backward" />}
                 iconSize={32}
-                onPress={() => null}
+                onPress={() => this.props.screenProps.prevSong()}
               />
               <View style={gStyle.pH3}>
                 <TouchIcon
@@ -119,12 +119,12 @@ class ModalMusicPlayer extends React.Component {
               <TouchIcon
                 icon={<FontAwesome color={colors.white} name="step-forward" />}
                 iconSize={32}
-                onPress={() => null}
+                onPress={() => this.props.screenProps.nextSong()}
               />
             </View>
             <TouchIcon
-              icon={<Feather color={colors.greyLight} name="repeat" />}
-              onPress={() => null}
+              icon={<Feather color={this.props.screenProps.repeat?colors.brandPrimary:colors.greyLight} name="repeat" />}
+              onPress={() => this.props.screenProps.onChangeRepeat(!this.props.screenProps.repeat)}
             />
           </View>
 

@@ -7,14 +7,21 @@ import { FontAwesome } from '@expo/vector-icons';
 
 import { withNavigation } from 'react-navigation';
 
-const LineItemAlbum = ({ active, downloaded, onPress, albumData,onPress2,navigation,isfavorite,onfav }) => (
+const LineItemFavorite = ({ active, downloaded, onPress, albumData,onPress2,navigation,isfavorite,onfav }) => (
 
   
   <View style={styles.container}>
     <TouchableOpacity
       activeOpacity={gStyle.activeOpacity}
        //onPress={() => onPress(albumData)}
-       onPress={() => navigation.navigate('Album', { title: 'item.title',id:albumData.id,album:albumData })}
+      //  onPress={() => navigation.navigate('Album', {
+      //     title: 'item.title',
+      //     id:albumData.id,
+      //     album:albumData,
+      //     loadFromUri:false,
+      //     results:[]
+      //   })}
+      onPress={onPress}
       style={gStyle.flex5}
     >
       <Text
@@ -51,12 +58,12 @@ const LineItemAlbum = ({ active, downloaded, onPress, albumData,onPress2,navigat
   </View>
 );
 
-LineItemAlbum.defaultProps = {
+LineItemFavorite.defaultProps = {
   active: false,
   downloaded: false
 };
 
-LineItemAlbum.propTypes = {
+LineItemFavorite.propTypes = {
   // required
   // onPress: PropTypes.func.isRequired,
   // songData: PropTypes.shape({
@@ -104,4 +111,4 @@ const styles = StyleSheet.create({
   }
 });
 
-export default withNavigation(LineItemAlbum);
+export default withNavigation(LineItemFavorite);

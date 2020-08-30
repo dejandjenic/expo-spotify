@@ -17,7 +17,7 @@ const PlaylistItem = ({ bgColor, onPress, title,isfavorite,onfav,xid }) => (
   </TouchableOpacity>
   <TouchableOpacity
           activeOpacity={gStyle.activeOpacity}
-          onPress={()=> onfav(xid,!isfavorite)}
+          onPress={()=> onfav(xid,!isfavorite,'Artist',{title:title})}
           style={styles.containerIcon}
         >
           <FontAwesome color={colors.brandPrimary} name={isfavorite ? 'heart' : 'heart-o'} size={20} />

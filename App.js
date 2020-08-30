@@ -1,7 +1,7 @@
 import React from 'react';
-import { ActivityIndicator, StatusBar } from 'react-native';
+import { View,StyleSheet,ActivityIndicator, StatusBar } from 'react-native';
 import { AppLoading } from 'expo';
-import { func } from './src/constants';
+import { func,colors } from './src/constants';
 
 // main navigation stack
 import Stack from './src/navigation/Stack';
@@ -10,6 +10,7 @@ import Stack from './src/navigation/Stack';
 import * as FileSystem from 'expo-file-system';
 import { Audio } from 'expo-av'
 
+const cf="favoritesf1.json";
 
 export default class App extends React.Component {
   constructor(props) {
@@ -35,10 +36,11 @@ export default class App extends React.Component {
       ispaused: true,
       maxpos: 1000,
       currentPos: 0,
-      isSongLoading: false,
+      isSongLoading: true,
       localCache: [],
       favorites: [],
-      shuffle:true
+      shuffle:true,
+      repeat:false
     };
 
     this.changeSong = this.changeSong.bind(this);
@@ -48,6 +50,12 @@ export default class App extends React.Component {
     this.findurl = this.findurl.bind(this);
     this.onDownload = this.onDownload.bind(this);
     this.onFavorite = this.onFavorite.bind(this);
+    this.setTrack = this.setTrack.bind(this);
+    this.shufflePlay = this.shufflePlay.bind(this);
+    this.onChangeShuffle = this.onChangeShuffle.bind(this);
+    this.onChangeRepeat = this.onChangeRepeat.bind(this);
+    this.nextSong = this.nextSong.bind(this);
+    this.prevSong = this.prevSong.bind(this);
   }
 
   async componentDidMount() {
@@ -74,7 +82,7 @@ export default class App extends React.Component {
       var localCache = JSON.parse(lcs)
 
 
-      var fPath = FileSystem.documentDirectory + "favorites.json";
+      var fPath = FileSystem.documentDirectory + cf;
 
       var fif = await FileSystem.getInfoAsync(fPath);
       if (!fif.exists) {
@@ -96,25 +104,34 @@ export default class App extends React.Component {
     this.fullfile = FileSystem.documentDirectory + 'tzWd3cVNSC4.mp3';
   }
 
+  async onChangeRepeat(val){
+    console.log("onChangeRepeat",val)
+    this.setState({repeat:val})    
+  }
 
-  async onFavorite(id, add) {
-    console.log("onFavorite", id, add)
+  async onChangeShuffle(val){
+console.log("onChangeShuffle",val)
+this.setState({shuffle:val})
+  }
+
+  async onFavorite(id, add,type,data) {
+    console.log("onFavorite", id, add,data)
     
     let { favorites } = this.state;
     console.log("onFavorite", favorites)
 
     if(add){
-      favorites.push(id);
+      favorites.push({id:id,type:type,data:data});
       await this.setState({ favorites }) 
     }
     else {
-      if (favorites.find((x) => x == id) != null) {
-        favorites = favorites.filter((x) => x != id);
+      if (favorites.find((x) => x.id == id) != null) {
+        favorites = favorites.filter((x) => x.id != id);
       }
     }
     console.log("onFavorite", favorites)
 this.setState({favorites})
-    var fPath = FileSystem.documentDirectory + "favorites.json";
+    var fPath = FileSystem.documentDirectory + cf;
 
     await FileSystem.writeAsStringAsync(fPath, JSON.stringify(favorites));
 
@@ -249,7 +266,62 @@ this.setState({favorites})
   }
 
 
-  onPlaybackStatusUpdate = status => {
+  async nextSong(){
+    await this.setState({currentPos:0})
+      this.setState({currentPos:0,maxpos:1000});
+      var current = this.state.tracks.findIndex((item)=> item.uri == this.state.currentSongData.id);
+      var next = current+1;
+      if(next>=this.state.tracks.length)
+      {
+        next=0;
+      }
+      this.changeSong(this.state.tracks[next],this.state.tracks);
+  }
+
+  async prevSong(){
+    await this.setState({currentPos:0})
+      this.setState({currentPos:0,maxpos:1000});
+      var current = this.state.tracks.findIndex((item)=> item.uri == this.state.currentSongData.id);
+      console.log("prev.current",current)
+      var next = current-1;
+      if(next<0)
+      {
+        next=this.state.tracks.length-1;
+      }
+      console.log("next",next)
+      console.log("this.state.tracks[next]",this.state.tracks[next])
+      this.changeSong(this.state.tracks[next],this.state.tracks);
+  }
+
+  async setTrack(tracks){
+
+    await this.setState({tracks})
+    await this.shufflePlay()
+  }
+
+  async shufflePlay(){
+
+    const getRandomInt= (max)=> {
+      return Math.floor(Math.random() * Math.floor(max));
+    }
+
+    await this.setState({currentPos:0})
+      this.setState({currentPos:0,maxpos:1000});
+
+      var current = this.state.tracks.findIndex((item)=> item.uri == (this.state.currentSongData?this.state.currentSongData.id:""));
+
+        var next = getRandomInt(this.state.tracks.length-1)
+        while(next==current){
+          next = getRandomInt(this.state.tracks.length-1)
+        }
+        console.log("next",next)
+        console.log("tracks",this.state.tracks,next)
+        
+        this.changeSong(this.state.tracks[next],this.state.tracks);
+  }
+  
+
+  onPlaybackStatusUpdate = async (status) => {
 
     
    const getRandomInt= (max)=> {
@@ -264,19 +336,23 @@ this.setState({favorites})
     //console.log("status", status)
 
     if (status.didJustFinish) {
-      this.setState({currentPos:0,maxpos:1000,currentPos:0});
-      if(this.state.shuffle){
-        var next = getRandomInt(this.state.tracks.length-1)
-        console.log("tracks",this.state.tracks,next)
-        
-        this.changeSong(this.state.tracks[next],this.state.tracks);
+      console.log("this.state.currentSongData",this.state.currentSongData)
+      console.log("this.state.tracks",this.state.tracks)
+      console.log("this.state.shuffle",this.state.shuffle)
+      if(this.state.repeat){
+        this.state.playbackInstance.setPositionAsync(0);
+      }
+      else if(this.state.shuffle){
+      await this.shufflePlay();
       }
       else{
-          var next = this.state.tracks.findIndex((item)=> item.id == this.state.currentSongData.id);
+          var next = this.state.tracks.findIndex((item)=> item.uri == this.state.currentSongData.id);
+          console.log("next",next)
           next++;
           if(next >= this.state.tracks.length){
             next=0;
           }
+          console.log("next song",this.state.tracks[next])
           this.changeSong(this.state.tracks[next],this.state.tracks);
       }
       //this.setState({ ispaused: true }) 
@@ -353,7 +429,11 @@ this.setState({favorites})
 
     var songLoading = null;
     if (isSongLoading) {
-      songLoading = <ActivityIndicator />
+      songLoading = <View style={styles.whiteOverlay}  >
+      <ActivityIndicator
+        size="large" color={colors.grey} 
+      />
+    </View >
     }
 
     if (isLoading) {
@@ -383,10 +463,32 @@ this.setState({favorites})
             onDownload: this.onDownload,
             localCache: this.state.localCache,
             onFavorite: this.onFavorite,
-            favorites: this.state.favorites
+            favorites: this.state.favorites,
+            setTrack:this.setTrack,
+            onChangeShuffle:this.onChangeShuffle,
+            shuffle:this.state.shuffle,
+            repeat:this.state.repeat,
+            onChangeRepeat:this.onChangeRepeat,
+            nextSong:this.nextSong,
+            prevSong:this.prevSong
           }}
         />
       </React.Fragment>
     );
   }
 }
+
+
+
+
+const styles = StyleSheet.create({
+  whiteOverlay: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
+    alignItems: 'center',
+    justifyContent: 'center'     
+ }
+});

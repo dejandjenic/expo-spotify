@@ -9,6 +9,7 @@ import TabNavigation from './TabNavigation';
 // screens
 import ModalMusicPlayer from '../screens/ModalMusicPlayer';
 import ModalMoreOptions from '../screens/ModalMoreOptions';
+import ModalFavorites from '../screens/ModalFavorites';
 
 const StackNavigator = createStackNavigator(
   {
@@ -26,6 +27,12 @@ const StackNavigator = createStackNavigator(
     },
     ModalMoreOptions: {
       screen: ModalMoreOptions,
+      navigationOptions: {
+        gesturesEnabled: false
+      }
+    },
+    ModalFavorites: {
+      screen: ModalFavorites,
       navigationOptions: {
         gesturesEnabled: false
       }

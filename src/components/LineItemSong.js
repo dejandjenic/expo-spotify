@@ -44,7 +44,7 @@ const LineItemSong = ({ active, downloaded, onPress, songData,onDownload ,isfavo
       </View><View style={styles.containerRight}>
       <TouchableOpacity
           activeOpacity={gStyle.activeOpacity}
-          onPress={()=> onfav(songData.uri,!isfavorite)}
+          onPress={()=> onfav(songData.uri,!isfavorite,'song',songData)}
           style={styles.containerIcon}
         >
           <FontAwesome color={colors.brandPrimary} name={isfavorite ? 'heart' : 'heart-o'} size={20} />
