@@ -4,7 +4,7 @@ import { View,StyleSheet, Text, TouchableOpacity } from 'react-native';
 import { colors, gStyle } from '../constants';
 import { FontAwesome } from '@expo/vector-icons';
 
-const PlaylistItem = ({ bgColor, onPress, title,isfavorite,onfav,xid }) => (
+const PlaylistItem = ({ bgColor, onPress, title,isfavorite,onfav,xid ,area}) => (
   <View 
   style={[styles.playlistItem, { backgroundColor: bgColor }]}
   >
@@ -14,6 +14,7 @@ const PlaylistItem = ({ bgColor, onPress, title,isfavorite,onfav,xid }) => (
     
   >
     <Text style={styles.playlistTitle}>{title}</Text>
+    <Text style={styles.playlistAreaTitle}>{area}</Text>
   </TouchableOpacity>
   <TouchableOpacity
           activeOpacity={gStyle.activeOpacity}
@@ -45,6 +46,10 @@ const styles = StyleSheet.create({
   playlistTitle: {
     ...gStyle.textSpotifyBold22,
     color: colors.white
+  },
+  playlistAreaTitle: {
+    ...gStyle.textSpotify12,
+    color: colors.greyLight
   }
 });
 

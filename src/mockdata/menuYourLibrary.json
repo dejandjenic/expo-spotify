@@ -1,5 +1,5 @@
 [
-  { "id": 2, "icon": "music", "title": "Playlists" },
+  { "id": 2, "icon": "music", "title": "Playlists" ,"type":"Playlist"},
  
   { "id": 4, "icon": "speaker", "title": "Songs","type":"song"},
   { "id": 5, "icon": "disc", "title": "Albums" ,"type":"album"},

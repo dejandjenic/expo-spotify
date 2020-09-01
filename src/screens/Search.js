@@ -155,6 +155,7 @@ class Search extends React.Component {
                 bgColor={colors.grey}
                 onPress={() => this.performAlbumSearch(item.id, item.name)}
                 title={item.name}
+                area={item.area?item.area.name:(item["begin-area"]?item["begin-area"].name:"")}
                 isfavorite={this.props.screenProps.favorites.find((x) => x.id == item.id) != null}
                 onfav={this.props.screenProps.onFavorite}
                 xid={item.id}
@@ -260,16 +261,26 @@ class Search extends React.Component {
                 style={styles.searchPlaceholder}
               >
                 <View style={gStyle.mR1}>
-                  <SvgSearch />
+                  <TouchableOpacity
+                      activeOpacity={1}
+                      onPress={this.performSearch}
+                  >
+                    <SvgSearch />
+                  </TouchableOpacity>
                 </View>
-                <Text style={styles.searchPlaceholderText}>
-                  Artists, songs or podcasts
-                </Text>
+                <TextInput 
+                      style={styles.searchPlaceholderText}
+                      placeholder="Type here to translate!"
+                      onChangeText={text => this.setState({ text })}
+                      defaultValue={text}
+                      onSubmitEditing={this.performSearch}
+                >
+                </TextInput>
               </TouchableOpacity>
             </Animated.View>
           </View>
 
-          <View style={styles.containerSearchBar2}>
+          {/* <View style={styles.containerSearchBar2}>
 
             <TextInput
               style={styles.searchPlaceholder}
@@ -280,7 +291,7 @@ class Search extends React.Component {
             <Button style={gStyle.mR1} title="search"
               onPress={this.performSearch}
             />
-          </View>
+          </View> */}
 
           {searchs}
 
@@ -323,12 +334,12 @@ class Search extends React.Component {
           </View> */}
         </Animated.ScrollView>
 
-        <View style={styles.iconRight}>
+        {/* <View style={styles.iconRight}>
           <TouchIcon
             icon={<FontAwesome color={colors.white} name="microphone" />}
             onPress={() => null}
           />
-        </View>
+        </View> */}
       </React.Fragment>
     );
   }

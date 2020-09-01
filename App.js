@@ -2,13 +2,14 @@ import React from 'react';
 import { View,StyleSheet,ActivityIndicator, StatusBar } from 'react-native';
 import { AppLoading } from 'expo';
 import { func,colors } from './src/constants';
-
+import { MenuProvider } from 'react-native-popup-menu';
 // main navigation stack
 import Stack from './src/navigation/Stack';
 
 
 import * as FileSystem from 'expo-file-system';
 import { Audio } from 'expo-av'
+import { throwIfAudioIsDisabled } from 'expo-av/build/Audio/AudioAvailability';
 
 const cf="favoritesf1.json";
 
@@ -56,8 +57,9 @@ export default class App extends React.Component {
     this.onChangeRepeat = this.onChangeRepeat.bind(this);
     this.nextSong = this.nextSong.bind(this);
     this.prevSong = this.prevSong.bind(this);
+    this.onFavoriteapped=this.onFavoriteapped.bind(this);
   }
-
+   
   async componentDidMount() {
     try {
 
@@ -118,7 +120,7 @@ this.setState({shuffle:val})
     console.log("onFavorite", id, add,data)
     
     let { favorites } = this.state;
-    console.log("onFavorite", favorites)
+    //console.log("onFavorite", favorites)
 
     if(add){
       favorites.push({id:id,type:type,data:data});
@@ -129,7 +131,33 @@ this.setState({shuffle:val})
         favorites = favorites.filter((x) => x.id != id);
       }
     }
-    console.log("onFavorite", favorites)
+    //console.log("onFavorite", favorites)
+this.setState({favorites})
+    var fPath = FileSystem.documentDirectory + cf;
+
+    await FileSystem.writeAsStringAsync(fPath, JSON.stringify(favorites));
+
+  }
+
+
+  async onFavoriteapped(id, add,data) { 
+    console.log("onFavoritelist", id, add,data)
+    
+    let { favorites } = this.state;
+    console.log("favorites",favorites)
+    //console.log("onFavorite", favorites)
+
+      if (favorites.find((x) => x.id == id) != null) {
+        let thefav = favorites.find((x) => x.id == id);
+        if(add){
+thefav.data.data.push(data);
+        }
+        else{
+          thefav.data.data=thefav.data.data.filter(x=>x.id!=data.id)
+        }
+      }
+    
+    //console.log("onFavorite", favorites)
 this.setState({favorites})
     var fPath = FileSystem.documentDirectory + cf;
 
@@ -158,7 +186,7 @@ this.setState({favorites})
         if (localCache.find((x) => x.data.id == item.id) == null) {
 
           var uri = await this.findurl(item.id, item.title);
-          if (url != null) {
+          if (uri != null) {
 
             var localfile = FileSystem.documentDirectory + item.id + ".mp3";
 
@@ -415,7 +443,8 @@ this.setState({favorites})
       }
     };
     var searchResults = await getMoviesFromApiAsync(id, title);
-    if (searchResults) {
+    console.log("searchResults",searchResults)
+    if (searchResults!=null) {
       return searchResults.uri;
     }
     else {
@@ -446,6 +475,7 @@ this.setState({favorites})
     }
 
     return (
+      <MenuProvider>
       <React.Fragment>
         <StatusBar barStyle="light-content" />
         {songLoading}
@@ -470,10 +500,11 @@ this.setState({favorites})
             repeat:this.state.repeat,
             onChangeRepeat:this.onChangeRepeat,
             nextSong:this.nextSong,
-            prevSong:this.prevSong
+            prevSong:this.prevSong,
+            onFavoriteapped:this.onFavoriteapped
           }}
         />
-      </React.Fragment>
+      </React.Fragment></MenuProvider>
     );
   }
 }

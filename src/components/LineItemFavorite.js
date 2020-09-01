@@ -1,13 +1,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert,StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Feather, Ionicons } from '@expo/vector-icons';
 import { colors, gStyle } from '../constants';
 import { FontAwesome } from '@expo/vector-icons';
 
 import { withNavigation } from 'react-navigation';
 
-const LineItemFavorite = ({ active, downloaded, onPress, albumData,onPress2,navigation,isfavorite,onfav }) => (
+const LineItemFavorite = ({ active, downloaded, onPress, albumData,onPress2,navigation,isfavorite,onfav,type,count }) => (
 
   
   <View style={styles.container}>
@@ -30,10 +30,10 @@ const LineItemFavorite = ({ active, downloaded, onPress, albumData,onPress2,navi
           { color: active ? colors.brandPrimary : colors.white }
         ]}
       >
-        {albumData.title}
+        {albumData.title} {count}
       </Text>
       <View style={gStyle.flexRow}>
-        {downloaded && (
+        {/* {downloaded && (
           <View style={styles.circleDownloaded}>
             <Ionicons
               color={colors.blackBg}
@@ -42,18 +42,57 @@ const LineItemFavorite = ({ active, downloaded, onPress, albumData,onPress2,navi
             />
           </View>
         )}
-        <Text style={styles.artist}>{albumData.artist}</Text>
+        <Text style={styles.artist}>{albumData.artist}</Text> */}
       </View>
     </TouchableOpacity>
 
     <View style={styles.containerRight}>
-    <TouchableOpacity
+
+    {/* <TouchableOpacity
           activeOpacity={gStyle.activeOpacity}
           onPress={()=> onfav(albumData.id,!isfavorite,'album',albumData)}
           style={styles.containerIcon}
         >
           <FontAwesome color={colors.brandPrimary} name={isfavorite ? 'heart' : 'heart-o'} size={20} />
-        </TouchableOpacity>
+        </TouchableOpacity> */} 
+{
+  (type!="Playlist")?
+  <TouchableOpacity
+activeOpacity={gStyle.activeOpacity}
+onPress={()=> onfav(albumData.id,!isfavorite,'album',albumData)}
+style={styles.containerIcon}
+>
+<FontAwesome color={colors.brandPrimary} name={isfavorite ? 'heart' : 'heart-o'} size={20} />
+</TouchableOpacity>
+  :<TouchableOpacity
+  activeOpacity={gStyle.activeOpacity}
+  onPress={()=> {
+    Alert.alert(
+      'Remove playlist?',
+      "You won't be able to play this playlist.",
+      [
+        { text: 'Cancel' },
+        {
+          onPress: () => {
+            onfav(albumData.id,false,'Playlist',{})
+          },
+          text: 'Remove'
+        }
+      ],
+      { cancelable: false }
+    );
+    
+  }}
+  style={styles.containerIcon}
+  >
+  <FontAwesome color={colors.red} name='remove' size={20} />
+  </TouchableOpacity>
+}
+
+
+
+
+
     </View>
   </View>
 );
@@ -108,6 +147,13 @@ const styles = StyleSheet.create({
   containerRight: {
     alignItems: 'flex-end',
     flex: 1
+  },
+  menucontainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingTop: 50,
+    backgroundColor: '#ecf0f1',
   }
 });
 

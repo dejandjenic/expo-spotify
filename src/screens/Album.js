@@ -57,45 +57,48 @@ class Album extends React.Component {
     this.setState({
       //album: albums[albumTitle] || null,
       album: lalbum,
-      song: currentSongData?currentSongData.title:"",
+      song: currentSongData ? currentSongData.title : "",
       title: albumTitle,
-      songtoplay:songtoplay
+      songtoplay: songtoplay
     });
     //console.log("lalbum", lalbum)
-if(loadFromUri){
-    await this.performTrackSearch(albumId, '')
-}
-else{
-  
-  //console.log("local album",lalbum,results)
-  var trackSearchResults={releases:[
-    {
-      media:[
-        {
-          tracks:[]
-        }
-      ]
+    if (loadFromUri) {
+      await this.performTrackSearch(albumId, '')
     }
-  ]};
-  
-  trackSearchResults.releases[0].media[0].tracks=results
-  .map(x=>
-    ({...x.data,id:x.id})
-    );
+    else {
 
-    await this.setState({trackSearchResults})
+      //console.log("local album",lalbum,results)
+      var trackSearchResults = {
+        releases: [
+          {
+            media: [
+              {
+                tracks: []
+              }
+            ]
+          }
+        ]
+      };
 
-if(songtoplay){
-    console.log("songtoplay",songtoplay,trackSearchResults.releases[0].media[0].tracks.find(x=>x.id==songtoplay))
+      trackSearchResults.releases[0].media[0].tracks = results
+        .map(x =>
+          ({ ...x.data, id: x.id })
+        );
 
-this.changeSong(trackSearchResults.releases[0].media[0].tracks.find(x=>x.id==songtoplay))
-}
-}
+      await this.setState({ trackSearchResults })
+
+      if (songtoplay) {
+        console.log("songtoplay", songtoplay, trackSearchResults.releases[0].media[0].tracks.find(x => x.id == songtoplay))
+
+        this.changeSong(trackSearchResults.releases[0].media[0].tracks.find(x => x.id == songtoplay))
+      }
+    }
+    console.log("trackSearchResults",trackSearchResults)
   }
 
-  async itemDownload(id,pdownload){
+  async itemDownload(id, pdownload) {
     console.log("itemDownload")
-    this.props.screenProps.onDownload(this.state.trackSearchResults.releases[0].media[0].tracks.filter((item)=>item.id == id),pdownload);
+    this.props.screenProps.onDownload(this.state.trackSearchResults.releases[0].media[0].tracks.filter((item) => item.id == id), pdownload);
   }
 
   async performTrackSearch(id, name) {
@@ -122,17 +125,17 @@ this.changeSong(trackSearchResults.releases[0].media[0].tracks.find(x=>x.id==son
     var trackSearchResults = await getMoviesFromApiAsync();
     this.setState({ trackSearchResults })
 
-var fromcache=     trackSearchResults.releases[0].media[0].tracks.filter((item) =>
-     this.props.screenProps.localCache.find((x) => x.data.id == item.id) != null
-   );
+    var fromcache = trackSearchResults.releases[0].media[0].tracks.filter((item) =>
+      this.props.screenProps.localCache.find((x) => x.data.id == item.id) != null
+    );
 
-   //console.log(this.state.trackSearchResults.releases[0].media[0].tracks.map((item)=>item.id));
-   //console.log(this.props.screenProps.localCache);
-   //console.log(fromcache);
-  //  console.log(trackSearchResults.releases[0].media[0].tracks.filter((item)=>true).length)
-  //  console.log(trackSearchResults.releases[0].media[0].tracks.lenght)
-  //  console.log(fromcache.length)
-    if (trackSearchResults.releases[0].media[0].tracks.filter((item)=>true).length ==
+    //console.log(this.state.trackSearchResults.releases[0].media[0].tracks.map((item)=>item.id));
+    //console.log(this.props.screenProps.localCache);
+    //console.log(fromcache);
+    //  console.log(trackSearchResults.releases[0].media[0].tracks.filter((item)=>true).length)
+    //  console.log(trackSearchResults.releases[0].media[0].tracks.lenght)
+    //  console.log(fromcache.length)
+    if (trackSearchResults.releases[0].media[0].tracks.filter((item) => true).length ==
       fromcache.length
     ) {
       this.setState({ downloaded: true });
@@ -171,27 +174,27 @@ var fromcache=     trackSearchResults.releases[0].media[0].tracks.filter((item) 
       this.setState({
         downloaded: val
       });
-      this.props.screenProps.onDownload(this.state.trackSearchResults.releases[0].media[0].tracks,true);
+      this.props.screenProps.onDownload(this.state.trackSearchResults.releases[0].media[0].tracks, true);
     }
   }
 
-  shufflePlay (){
-console.log("shufflePlay",this.state.trackSearchResults.releases[0].media[0].tracks,this.state.album)
-this.props.screenProps.setTrack(
+  shufflePlay() {
+    console.log("shufflePlay", this.state.trackSearchResults.releases[0].media[0].tracks, this.state.album)
+    this.props.screenProps.setTrack(
 
-  this.state.trackSearchResults.releases[0].media[0].tracks
-      .map((track)=>
-        ({
-          album: this.state.album.title,
-          artist: this.state.album.artist,
-          image: 'album.image',
-          length: track.length / 1000,
-          title: track.title,
-          uri: track.id
-        })
+      this.state.trackSearchResults.releases[0].media[0].tracks
+        .map((track) =>
+          ({
+            album: this.state.album.title,
+            artist: this.state.album.artist,
+            image: 'album.image',
+            length: track.length / 1000,
+            title: track.title,
+            uri: track.id
+          })
         )
 
-)
+    )
   }
 
   changeSong(songData) {
@@ -201,17 +204,17 @@ this.props.screenProps.setTrack(
 
     changeSong(songData,
       this.state.trackSearchResults.releases[0].media[0].tracks
-      .map((track)=>
-        ({
-          album: this.state.album.title,
-          artist: this.state.album.artist,
-          image: 'album.image',
-          length: track.length / 1000,
-          title: track.title,
-          uri: track.id
-        })
+        .map((track) =>
+          ({
+            album: this.state.album.title,
+            artist: this.state.album.artist,
+            image: 'album.image',
+            length: track.length / 1000,
+            title: track.title,
+            uri: track.id
+          })
         )
-      );
+    );
 
     this.setState({
       song: songData.title
@@ -231,7 +234,7 @@ this.props.screenProps.setTrack(
       navigation,
       screenProps: { toggleTabBarState, setToggleTabBar }
     } = this.props;
-    const { album, downloaded, scrollY, song, title } = this.state;
+    const { album, downloaded, scrollY, song, title } = this.state; 
 
     // album data not set?
     if (album === null) {
@@ -362,17 +365,19 @@ this.props.screenProps.setTrack(
                   downloaded={this.props.screenProps.localCache.find((x) => x.data.id == track.id) != null}
                   key={index.toString()}
                   onPress={this.changeSong}
-                  onDownload = {this.itemDownload}
-                  isfavorite={this.props.screenProps.favorites.find((x)=> x.id == track.id)!=null}
+                  onDownload={this.itemDownload}
+                  isfavorite={this.props.screenProps.favorites.find((x) => x.id == track.id) != null}
                   onfav={this.props.screenProps.onFavorite}
                   songData={{
                     album: album.title,
-                    artist: album.artist,
+                    artist: track.artist,
                     image: 'album.image',
                     length: track.length / 1000,
                     title: track.title,
                     uri: track.id
                   }}
+                  favorites={this.props.screenProps.favorites.filter(f=>f.type=="Playlist")}
+                  onfavlist={(id,add,data)=> this.props.screenProps.onFavoriteapped(id,add,data)}
                 />
               ))}
           </View>
