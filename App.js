@@ -6,12 +6,12 @@ import { MenuProvider } from 'react-native-popup-menu';
 // main navigation stack
 import Stack from './src/navigation/Stack';
 
-
 import * as FileSystem from 'expo-file-system';
 import { Audio } from 'expo-av'
 import { throwIfAudioIsDisabled } from 'expo-av/build/Audio/AudioAvailability';
 
 const cf="favoritesf1.json";
+const rs="recentsearches.json";
 
 export default class App extends React.Component {
   constructor(props) {
@@ -37,11 +37,12 @@ export default class App extends React.Component {
       ispaused: true,
       maxpos: 1000,
       currentPos: 0,
-      isSongLoading: true,
+      isSongLoading: false,
       localCache: [],
       favorites: [],
       shuffle:true,
-      repeat:false
+      repeat:false,
+      recentseaches:[]
     };
 
     this.changeSong = this.changeSong.bind(this);
@@ -58,6 +59,7 @@ export default class App extends React.Component {
     this.nextSong = this.nextSong.bind(this);
     this.prevSong = this.prevSong.bind(this);
     this.onFavoriteapped=this.onFavoriteapped.bind(this);
+    this.onaddsearch=this.onaddsearch.bind(this);
   }
    
   async componentDidMount() {
@@ -97,6 +99,23 @@ export default class App extends React.Component {
 
       this.setState({ localCache, favorites })
 
+
+
+
+      //recent searches
+      var rsPath = FileSystem.documentDirectory + rs;
+
+      var firecentsearches = await FileSystem.getInfoAsync(rsPath);
+      if (!firecentsearches.exists) {
+        await FileSystem.writeAsStringAsync(rsPath, "[]");
+      }
+
+      var rsr=await FileSystem.readAsStringAsync(rsPath);
+      var recentseaches = JSON.parse(rsr)
+
+
+      this.setState({ localCache, favorites,recentseaches })
+
     } catch (e) {
       console.log(e)
     }
@@ -104,6 +123,32 @@ export default class App extends React.Component {
     console.log("componentDidMount", this.state.localCache.length)
 
     this.fullfile = FileSystem.documentDirectory + 'tzWd3cVNSC4.mp3';
+  }
+
+  async onaddsearch(text,add,time){
+    console.log("onaddsearch",text,add,time)
+    if(text=="" && add){
+      return;
+    }
+    
+    let {recentseaches}=this.state;
+    if(add){
+    if(recentseaches.find(x=>x.text==text)==null){
+      recentseaches.push({text:text,timestamp:time});
+    }
+    else{
+      recentseaches=recentseaches.filter(x=>x.text!=text);
+      recentseaches.push({text:text,timestamp:time});
+    }
+  }else{
+    if(recentseaches.find(x=>x.text==text)!=null){
+      recentseaches=recentseaches.filter(x=>x.text!=text);
+    }
+  }
+    this.setState({recentseaches});
+    var fPath = FileSystem.documentDirectory + rs;
+
+    await FileSystem.writeAsStringAsync(fPath, JSON.stringify(recentseaches));
   }
 
   async onChangeRepeat(val){
@@ -174,7 +219,7 @@ this.setState({favorites})
       this.setState({
         downloadProgress: progress,
       }); 
-    };
+    }; 
 
     var localCache = this.state.localCache;
     this.setState({ isSongLoading: true });
@@ -456,13 +501,16 @@ this.setState({favorites})
   render() {
     const { currentSongData, isLoading, toggleTabBar, isSongLoading } = this.state;
 
-    var songLoading = null;
+    var songLoading = null; 
     if (isSongLoading) {
       songLoading = <View style={styles.whiteOverlay}  >
       <ActivityIndicator
-        size="large" color={colors.grey} 
+        size="large" color={colors.brandPrimary}
       />
     </View >
+    }
+    else{
+      songLoading=null
     }
 
     if (isLoading) {
@@ -501,7 +549,9 @@ this.setState({favorites})
             onChangeRepeat:this.onChangeRepeat,
             nextSong:this.nextSong,
             prevSong:this.prevSong,
-            onFavoriteapped:this.onFavoriteapped
+            onFavoriteapped:this.onFavoriteapped,
+            recentseaches:this.state.recentseaches,
+            onaddsearch:this.onaddsearch
           }}
         />
       </React.Fragment></MenuProvider>
@@ -520,6 +570,7 @@ const styles = StyleSheet.create({
     top: 0,
     bottom: 0,
     alignItems: 'center',
-    justifyContent: 'center'     
+    justifyContent: 'center'  ,
+    zIndex:200
  }
 });

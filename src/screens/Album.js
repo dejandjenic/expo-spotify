@@ -261,6 +261,7 @@ class Album extends React.Component {
       extrapolate: 'clamp'
     });
 
+    
     return (
       <View style={gStyle.container}>
         {toggleTabBarState ? (
@@ -378,6 +379,7 @@ class Album extends React.Component {
                   }}
                   favorites={this.props.screenProps.favorites.filter(f=>f.type=="Playlist")}
                   onfavlist={(id,add,data)=> this.props.screenProps.onFavoriteapped(id,add,data)}
+                  isinplaylist={this.props.screenProps.favorites.filter(f=>f.type=="Playlist").flatMap(x=>x.data.data).find(x=>x.uri == track.id)!=null}
                 />
               ))}
           </View>

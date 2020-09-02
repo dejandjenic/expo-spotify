@@ -28,7 +28,7 @@ import albums from '../mockdata/albums';
 class Search extends React.Component {
   constructor(props) {
     super(props);
-
+    this.textInput = React.createRef();
     // search start (24 horizontal padding )
     const searchStart = device.width - 48;
 
@@ -41,17 +41,55 @@ class Search extends React.Component {
       albumSearchResults: null,
       selectedAlbum: null,
       trackSearchResults: null,
-      text: "riblja"
+      text: "",
+      textsearch: false,
+      inputtext: null
     };
 
     this.performSearch = this.performSearch.bind(this);
     this.performAlbumSearch = this.performAlbumSearch.bind(this);
     this.performTrackSearch = this.performTrackSearch.bind(this);
+
+    this.focusTextInput = this.focusTextInput.bind(this);
+    this.compareValues = this.compareValues.bind(this);
+  }
+
+  compareValues(key, order = 'asc') {
+    return function innerSort(a, b) {
+      if (!a.hasOwnProperty(key) || !b.hasOwnProperty(key)) {
+        // property doesn't exist on either object
+        return 0;
+      }
+  
+      const varA = (typeof a[key] === 'string')
+        ? a[key].toUpperCase() : a[key];
+      const varB = (typeof b[key] === 'string')
+        ? b[key].toUpperCase() : b[key];
+  
+      let comparison = 0;
+      if (varA > varB) {
+        comparison = 1;
+      } else if (varA < varB) {
+        comparison = -1;
+      }
+      return (
+        (order === 'desc') ? (comparison * -1) : comparison
+      );
+    };
+  }
+
+  async focusTextInput() {
+    // Explicitly focus the text input using the raw DOM API
+    // Note: we're accessing "current" to get the DOM node
+    await this.setState({ textsearch: true});
+    //this.textInput.current.focus();
+
   }
 
   async performSearch() {
-    this.setState({ selectedArtist: null, albumSearchResults: null, trackSearchResults: null, selectedAlbum: null })
+    this.setState({ selectedArtist: null, albumSearchResults: null, trackSearchResults: null, selectedAlbum: null,searchResults:null })
     console.log("performSearch", this.state.text)
+    this.props.screenProps.onaddsearch(this.state.text,true,new Date().getTime());
     if (!this.state.text) {
       return;
     }
@@ -155,7 +193,7 @@ class Search extends React.Component {
                 bgColor={colors.grey}
                 onPress={() => this.performAlbumSearch(item.id, item.name)}
                 title={item.name}
-                area={item.area?item.area.name:(item["begin-area"]?item["begin-area"].name:"")}
+                area={item.area ? item.area.name : (item["begin-area"] ? item["begin-area"].name : "")}
                 isfavorite={this.props.screenProps.favorites.find((x) => x.id == item.id) != null}
                 onfav={this.props.screenProps.onFavorite}
                 xid={item.id}
@@ -255,28 +293,82 @@ class Search extends React.Component {
           <View style={gStyle.spacer11} />
           <View style={styles.containerSearchBar}>
             <Animated.View style={{ width: opacity }}>
-              <TouchableOpacity
-                activeOpacity={1}
-                onPress={() => null}
-                style={styles.searchPlaceholder}
-              >
-                <View style={gStyle.mR1}>
-                  <TouchableOpacity
-                      activeOpacity={1}
-                      onPress={this.performSearch}
-                  >
-                    <SvgSearch />
-                  </TouchableOpacity>
-                </View>
-                <TextInput 
-                      style={styles.searchPlaceholderText}
-                      placeholder="Type here to translate!"
-                      onChangeText={text => this.setState({ text })}
-                      defaultValue={text}
-                      onSubmitEditing={this.performSearch}
+              {!this.state.textsearch ?
+                <TouchableOpacity
+                  activeOpacity={1}
+                  onPress={this.focusTextInput}
+                  style={styles.searchPlaceholder}
                 >
-                </TextInput>
-              </TouchableOpacity>
+                  <View style={gStyle.mR1}>
+                    <SvgSearch />
+                  </View>
+                  <Text style={styles.searchPlaceholderText}>
+                    Artists, songs or podcasts
+                </Text>
+                </TouchableOpacity> : null
+              }
+              {this.state.textsearch ?
+                <View><TouchableOpacity
+                  activeOpacity={1}
+                  onPress={() => null}
+                  style={styles.searchPlaceholder}
+                >
+                  <View style={gStyle.mR1}>
+                    <TouchableOpacity
+                      activeOpacity={1}
+                      onPress={async ()=>
+                        {
+                          await this.setState({text:"",searchResults:null});
+                          this.performSearch();
+                        }
+                        }
+                    >
+                      <SvgSearch />
+                    </TouchableOpacity>
+                  </View>
+                  <TextInput
+                    style={styles.searchPlaceholderText}
+                    placeholder="Type here to search!"
+                    onChangeText={text => this.setState({ text })}
+                    defaultValue={text}
+                    onSubmitEditing={this.performSearch}
+                    ref={this.textInput}
+                  >
+                  </TextInput>
+                </TouchableOpacity>
+                {searchs==null?
+                this.props.screenProps.recentseaches.sort(this.compareValues('timestamp','desc')).map((search,index)=>
+                  <View
+                  key={index.toString()}
+                  style={styles.container}
+                  >
+                    
+                    <TouchableOpacity
+                  onPress={async ()=>{
+                    await this.setState({text:search.text})
+                    this.performSearch();
+                  }}
+                  >
+                    <Text style={{color:colors.white,fontSize:22,padding:5}}>{search.text}</Text>
+                  </TouchableOpacity>
+                  
+                  
+                  <View  style={styles.containerRight}>
+                  <TouchableOpacity 
+                  onPress={()=>this.props.screenProps.onaddsearch(search.text,false)}
+                  >
+                    <FontAwesome color={colors.red} name='remove' size={20} />
+                  </TouchableOpacity>
+                  </View>
+                  </View>
+                  ):null
+              }
+                
+                </View> : null
+              }
+
+              
+
             </Animated.View>
           </View>
 
@@ -375,7 +467,8 @@ const styles = StyleSheet.create({
   },
   searchPlaceholderText: {
     ...gStyle.textSpotify16,
-    color: colors.blackBg
+    color: colors.blackBg,
+    width:'100%'
   },
   sectionHeading: {
     ...gStyle.textSpotifyBold18,
@@ -401,6 +494,9 @@ const styles = StyleSheet.create({
     right: 24,
     top: device.web ? 40 : 78,
     width: 28
+  },containerRight: {
+    alignItems: 'flex-end',
+    flex: 1
   }
 });
 

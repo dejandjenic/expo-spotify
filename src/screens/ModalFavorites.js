@@ -19,6 +19,7 @@ import {
 } from 'react-native-popup-menu';
 
 import DialogInput from 'react-native-dialog-input';
+import { TouchableOpacity } from 'react-native-gesture-handler';
 
 class ModalFavorites extends React.Component {
   constructor(props) {
@@ -166,22 +167,29 @@ class ModalFavorites extends React.Component {
         <ModalHeader
           left={<Feather color={colors.greyLight} name="chevron-down" />}
           leftPress={() => navigation.goBack(null)}
-          right={this.state.type == "Playlist" ? <Menu>
-            <MenuTrigger>
-              <Feather color={colors.greyInactive} name="more-vertical" size={24} />
-            </MenuTrigger>
-            <MenuOptions>
-              <MenuOption onSelect={() => this.showDialog(true)} text='New' />
-              <MenuOption onSelect={() => alert(`Save`)} text='Save' />
-              <MenuOption onSelect={() => alert(`Delete`)} >
-                <Text style={{ color: 'red' }}>Delete</Text>
-              </MenuOption>
-              <MenuOption onSelect={() => alert(`Not called`)} disabled={true} text='Disabled' />
-              <MenuOption>
-                <FontAwesome color={colors.brandPrimary} name='heart' size={20} />
-              </MenuOption>
-            </MenuOptions>
-          </Menu> : null}
+          right={this.state.type == "Playlist" ? 
+          <TouchableOpacity
+          onPress={()=> this.showDialog(true)}
+          >
+            <MaterialIcons color={colors.greyLight} name='add' size={20} />
+          </TouchableOpacity>
+          //<Menu>
+          //   <MenuTrigger>
+          //     <Feather color={colors.greyInactive} name="more-vertical" size={24} />
+          //   </MenuTrigger>
+          //   <MenuOptions>
+          //     <MenuOption onSelect={() => this.showDialog(true)} text='New' />
+          //     <MenuOption onSelect={() => alert(`Save`)} text='Save' />
+          //     <MenuOption onSelect={() => alert(`Delete`)} >
+          //       <Text style={{ color: 'red' }}>Delete</Text>
+          //     </MenuOption>
+          //     <MenuOption onSelect={() => alert(`Not called`)} disabled={true} text='Disabled' />
+          //     <MenuOption>
+          //       <FontAwesome color={colors.brandPrimary} name='heart' size={20} />
+          //     </MenuOption>
+          //   </MenuOptions>
+          // </Menu> 
+          : null}
           text={title}
         />
 

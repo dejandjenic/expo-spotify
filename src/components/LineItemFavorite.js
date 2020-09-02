@@ -27,7 +27,7 @@ const LineItemFavorite = ({ active, downloaded, onPress, albumData,onPress2,navi
       <Text
         style={[
           styles.title,
-          { color: active ? colors.brandPrimary : colors.white }
+          { color: active ? colors.brandPrimary : colors.white,fontSize:22,paddingLeft:25 }
         ]}
       >
         {albumData.title} {count}

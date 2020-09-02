@@ -4,7 +4,7 @@ import { Switch, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Feather, Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { colors, gStyle } from '../constants';
 import { FontAwesome } from '@expo/vector-icons';
-
+import { withMenuContext } from 'react-native-popup-menu';
 
 import {
   MenuContext,
@@ -21,14 +21,19 @@ class LineItemSong extends React.Component {
     super(props);
 
     this.state = {
-      dialogvisible: false
+      dialogvisible: false,
+      playlistAction:null
     };
 
     // this.toggleDownloaded = this.toggleDownloaded.bind(this);
   }
 
   render() {
-    const { active, downloaded, onPress, songData, onDownload, isfavorite, onfav,onfavlist } = this.props;
+    const { active, downloaded, onPress, songData, onDownload, isfavorite, onfav,onfavlist,ctx,isinplaylist } = this.props;
+    let xdata = this.props.favorites;
+    
+      let xdata2=this.props.favorites.filter(x=>x.data.data.find(y=>y.uri==songData.uri)!=null);
+    
     return (
       <View style={styles.container}>
         <TouchableOpacity
@@ -73,7 +78,7 @@ class LineItemSong extends React.Component {
         >
           <FontAwesome color={colors.brandPrimary} name={isfavorite ? 'heart' : 'heart-o'} size={20} />
         </TouchableOpacity> */}
-          <View style={styles.container}>
+         
             <Dialog
               visible={this.state.dialogvisible}
               dialogAnimation={new SlideAnimation({
@@ -82,7 +87,7 @@ class LineItemSong extends React.Component {
               width={0.9}
               height={500}
               dialogTitle={<DialogTitle
-                title="Select playlist"
+                title={this.state.playlistAction=="add"?"Select playlist":"Remove from playlist"}
                 style={{
                   backgroundColor: '#F7F7F8',
                 }}
@@ -93,19 +98,22 @@ class LineItemSong extends React.Component {
               <DialogContent
                 style={{
                   height: 370,
-                  padding: 50
+                  padding: 50,
+                  backgroundColor:colors.black
                 }}
               >
 
                 {
-                  this.props.favorites.map((f,index) =><TouchableOpacity key={index.toString()}
+                  (this.state.playlistAction=="add"?xdata:xdata2).map((f,index) =><TouchableOpacity key={index.toString()}
                       onPress={() => {
-                        onfavlist(f.id,true,songData)
+                        onfavlist(f.id,this.state.playlistAction=="add",songData)
                         this.setState({ dialogvisible: false });
                       }}
                     ><View><Text
                       style={{
-                        fontSize: 18
+                        fontSize: 22,
+                        padding:10,
+                        color:colors.white
                       }}
                     >{f.data.title}</Text></View></TouchableOpacity>
                   )
@@ -114,50 +122,86 @@ class LineItemSong extends React.Component {
 
 
               </DialogContent>
-              <DialogFooter>
-                <DialogButton
+              <DialogFooter
+              style={{backgroundColor:colors.black,color:colors.white}}
+              >
+                {/* <DialogButton
                   text="CANCEL"
                   onPress={() => this.setState({ dialogvisible: false })}
-                />
+                /> */}
                 <DialogButton
-                  text="OK"
+                  text="Close"
                   onPress={() => this.setState({ dialogvisible: false })}
+                  textStyle={{color:colors.white}}
+                  
                 />
               </DialogFooter>
             </Dialog>
-          </View>
-
-
+        
           <Menu>
             <MenuTrigger>
               <Feather color={colors.greyInactive} name="more-vertical" size={24} />
             </MenuTrigger>
             <MenuOptions>
-              <MenuOption>
-                <Switch
+              <MenuOption style={{padding:20,alignItems:'center'}}>
+                {/* <Switch
                   trackColor={colors.greySwitchBorder}
                   onValueChange={val => onDownload(songData.uri, !downloaded)}
                   value={downloaded}
-                />
-              </MenuOption>
-              <MenuOption>
-                <TouchableOpacity
+                /> */}
+
+<TouchableOpacity
                   activeOpacity={gStyle.activeOpacity}
-                  onPress={() => onfav(songData.uri, !isfavorite, 'song', songData)}
+                  onPress={() => {
+                    onDownload(songData.uri, !downloaded);
+                    ctx.menuActions.closeMenu();}
+                  }
                   style={styles.containerIcon}
                 >
-                  <FontAwesome color={colors.brandPrimary} name={isfavorite ? 'heart' : 'heart-o'} size={20} />
+                  <Feather color={colors.grey} name={downloaded ? 'delete' : 'download-cloud'} size={20} />
                 </TouchableOpacity>
+
               </MenuOption>
-              <MenuOption>
+              <MenuOption style={{padding:20,alignItems:'center'}}>
                 <TouchableOpacity
                   activeOpacity={gStyle.activeOpacity}
-                  onPress={() => this.setState({ dialogvisible: true })}
+                  onPress={() => {
+                    onfav(songData.uri, !isfavorite, 'song', songData);
+                    ctx.menuActions.closeMenu();
+                }}
                   style={styles.containerIcon}
                 >
-                  <MaterialIcons color={colors.brandPrimary} name='playlist-add' size={20} />
+                  <FontAwesome color={colors.grey} name={isfavorite ? 'heart' : 'heart-o'} size={20} />
                 </TouchableOpacity>
               </MenuOption>
+              <MenuOption style={{padding:20,alignItems:'center'}}>
+                <TouchableOpacity
+                  activeOpacity={gStyle.activeOpacity}
+                  onPress={() => {
+                      this.setState({ dialogvisible: true,playlistAction:'add' });
+                    
+                    ctx.menuActions.closeMenu();
+                  }}
+                  style={styles.containerIcon}
+                >
+                  <MaterialIcons color={colors.grey} name='playlist-add' size={20} />
+                </TouchableOpacity>
+              </MenuOption>
+              {
+                isinplaylist?<MenuOption style={{padding:20,alignItems:'center'}}>
+                <TouchableOpacity
+                  activeOpacity={gStyle.activeOpacity}
+                  onPress={() => {
+                      this.setState({ dialogvisible: true,playlistAction:'remove' });
+                    
+                    ctx.menuActions.closeMenu();
+                  }}
+                  style={styles.containerIcon}
+                >
+                  <MaterialIcons color={colors.grey} name='playlist-add-check' size={20} />
+                </TouchableOpacity>
+              </MenuOption>:null
+              }
             </MenuOptions>
           </Menu>
         </View>
@@ -229,4 +273,4 @@ const styles = StyleSheet.create({
   }
 });
 
-export default LineItemSong;
+export default withMenuContext(LineItemSong);
