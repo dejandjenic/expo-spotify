@@ -24,6 +24,8 @@ import topGenres from '../mockdata/searchTopGenres';
 
 import LineItemAlbum from '../components/LineItemAlbum';
 import albums from '../mockdata/albums';
+import LineItemSongSearch from '../components/LineItemSongSearch';
+
 
 class Search extends React.Component {
   constructor(props) {
@@ -43,16 +45,37 @@ class Search extends React.Component {
       trackSearchResults: null,
       text: "",
       textsearch: false,
-      inputtext: null
+      inputtext: null,
+      searchfor:'artist'
     };
 
     this.performSearch = this.performSearch.bind(this);
     this.performAlbumSearch = this.performAlbumSearch.bind(this);
     this.performTrackSearch = this.performTrackSearch.bind(this);
 
+    this.performArtistSearch = this.performArtistSearch.bind(this);
+    this.performSimpleTrackSearch = this.performSimpleTrackSearch.bind(this);
+
     this.focusTextInput = this.focusTextInput.bind(this);
     this.compareValues = this.compareValues.bind(this);
+    this.changeSong = this.changeSong.bind(this);
+    this.itemDownload = this.itemDownload.bind(this);
   }
+
+  async itemDownload(id, pdownload) {
+    console.log("itemDownload")
+    this.props.screenProps.onDownload(this.state.trackSearchResults.releases[0].media[0].tracks.filter((item) => item.id == id), pdownload);
+  }
+
+  changeSong(songData) {
+    const {
+      screenProps: { changeSong }
+    } = this.props;
+
+    changeSong(songData,
+      [songData]
+    )
+        }
 
   compareValues(key, order = 'asc') {
     return function innerSort(a, b) {
@@ -87,6 +110,21 @@ class Search extends React.Component {
   }
 
   async performSearch() {
+    await this.performSimpleTrackSearch()
+    await this.performArtistSearch()
+    if(this.state.searchResults && this.state.searchResultsTrack)
+    {
+      console.log("compare",this.state.searchResults.artists.length,this.state.searchResultsTrack.recordings.filter(x=>x.releases[0]['release-group']['secondary-types']==null).length)
+      if(this.state.searchResults.artists.length>0){//>this.state.searchResultsTrack.recordings.filter(x=>x.releases[0]['release-group']['secondary-types']==null).length){
+        await this.setState({searchfor:'artist'})
+      }
+      else{
+        await this.setState({searchfor:'song'})
+      }
+    }
+  }
+
+  async performArtistSearch() {
     this.setState({ selectedArtist: null, albumSearchResults: null, trackSearchResults: null, selectedAlbum: null,searchResults:null })
     console.log("performSearch", this.state.text)
     this.props.screenProps.onaddsearch(this.state.text,true,new Date().getTime());
@@ -113,6 +151,36 @@ class Search extends React.Component {
     };
     var searchResults = await getMoviesFromApiAsync();
     this.setState({ searchResults })
+  }
+
+  async performSimpleTrackSearch() {
+    this.setState({ searchResultsTrack: null })
+    console.log("performSearch", this.state.text)
+    this.props.screenProps.onaddsearch(this.state.text,true,new Date().getTime());
+    if (!this.state.text) {
+      return;
+    }
+
+    const getMoviesFromApiAsync = async () => {
+      try {
+        //'+this.state.text+'
+        let response = await fetch(
+          'https://musicbrainz.org/ws/2/recording/?query=' + this.state.text + '&fmt=json', {
+          headers: {
+            'User-Agent': 'dejan app/1.0.0 (dejandjenic@gmail.com)'
+          }
+        }
+        );
+        let json = await response.json();
+        //console.log(json)
+        return json;
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    var searchResultsTrack = await getMoviesFromApiAsync();
+    console.log("track search results",searchResultsTrack.recordings.filter(x=>x.releases[0]['release-group']['secondary-types']==null))
+    this.setState({ searchResultsTrack })
   }
 
   async performAlbumSearch(id, name) {
@@ -178,6 +246,36 @@ class Search extends React.Component {
       outputRange: [searchStart, searchEnd],
       extrapolate: 'clamp'
     });
+
+    let tracksearch = null;
+    if (this.state.searchResultsTrack) {
+      tracksearch = this.state.searchResultsTrack.recordings.filter(x=>x.releases[0]['release-group']['secondary-types']==null).map((track,index)=>
+      <LineItemSongSearch
+      style={{color:colors.white}}
+      key={index.toString()}  
+
+      active={this.props.screenProps.currentSongData && this.props.screenProps.currentSongData.title === track.title}
+                  downloaded={this.props.screenProps.localCache.find((x) => x.data.id == track.id) != null}
+                  key={index.toString()}
+                  onPress={this.changeSong}
+                  onDownload={this.itemDownload}
+                  isfavorite={this.props.screenProps.favorites.find((x) => x.id == track.id) != null}
+                  onfav={this.props.screenProps.onFavorite}
+                  songData={{
+                    album: track.releases[0]['release-group'].title,
+                    artist: track['artist-credit'][0].artist.name,
+                    image: 'album.image',
+                    length: track.length / 1000,
+                    title: track.title,
+                    uri: track.id
+                  }}
+                  favorites={this.props.screenProps.favorites.filter(f=>f.type=="Playlist")}
+                  onfavlist={(id,add,data)=> this.props.screenProps.onFavoriteapped(id,add,data)}
+                  isinplaylist={this.props.screenProps.favorites.filter(f=>f.type=="Playlist").flatMap(x=>x.data.data).find(x=>x.uri == track.id)!=null}
+    />
+    // {item.title} {item['artist-credit'][0].artist.name} {item.releases[0]['release-group'].title}</Text>
+      )
+    }
 
 
     let searchs = null;
@@ -385,11 +483,68 @@ class Search extends React.Component {
             />
           </View> */}
 
+          {this.state.searchResults?
+          <View style={styles.containerRow}>
+<View
+ style={{
+  borderRadius: 6,
+  height: 98,
+  flex: 1,
+  marginBottom: 24,
+  marginRight: 24,
+  width: '50%',
+  backgroundColor:colors.grey,
+  justifyContent: "center",
+  alignItems:"center"
+}}>
+          <TouchableOpacity
+          onPress={()=>this.setState({searchfor:'artist'})}
+          >
+            <Text style={{color:this.state.searchfor=="artist"?colors.yellow:colors.white,fontSize:26}}>Artist</Text>
+          </TouchableOpacity>
+          </View>
+
+          <View
+ style={{
+  borderRadius: 6,
+  height: 98,
+  flex: 1,
+  marginBottom: 24,
+  marginRight: 24,
+  width: '50%',
+  backgroundColor:colors.grey,
+  justifyContent: "center",
+  alignItems:"center"
+}}>
+          <TouchableOpacity
+onPress={()=>this.setState({searchfor:'song'})}
+>
+  <Text style={{color:this.state.searchfor!="artist"?colors.yellow:colors.white,fontSize:26}}>Song</Text>
+</TouchableOpacity>
+</View>
+</View>
+:null}
+          {
+this.state.searchfor=="artist"?
+
+          
+          <View>
+
           {searchs}
 
           {aalbums}
 
           {tracks}
+</View>:null}
+
+{
+this.state.searchfor!="artist"?
+
+          
+          <View>
+
+          {tracksearch}
+</View>:null}
 
           {/* <Text style={styles.sectionHeading}>Your top genres</Text>
           <View style={styles.containerRow}>

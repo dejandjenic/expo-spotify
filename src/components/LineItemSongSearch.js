@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Image,Switch, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Switch, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Feather, Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { colors, gStyle } from '../constants';
 import { FontAwesome } from '@expo/vector-icons';
@@ -16,7 +16,7 @@ import {
 
 import Dialog, { SlideAnimation, DialogContent, DialogFooter, DialogButton, DialogTitle } from 'react-native-popup-dialog';
 
-class LineItemSong extends React.Component {
+class LineItemSongSearch extends React.Component {
   constructor(props) {
     super(props);
 
@@ -36,18 +36,10 @@ class LineItemSong extends React.Component {
     
     return (
       <View style={styles.container}>
-        <View style={gStyle.flex1}>
-            <Image source={{
-              uri: songData.image
-            }} 
-            style={{backgroundColor:colors.white,width:50,height:50}}
-            />
-            
-          </View>
         <TouchableOpacity
           activeOpacity={gStyle.activeOpacity}
           onPress={() => onPress(songData)}
-          style={gStyle.flex4}
+          style={gStyle.flex5}
         >
           <Text
             style={[
@@ -218,18 +210,18 @@ class LineItemSong extends React.Component {
   }
 }
 
-LineItemSong.defaultProps = {
+LineItemSongSearch.defaultProps = {
   active: false,
   downloaded: false
 };
 
-LineItemSong.propTypes = {
+LineItemSongSearch.propTypes = {
   // required
   onPress: PropTypes.func.isRequired,
   songData: PropTypes.shape({
     album: PropTypes.string.isRequired,
     artist: PropTypes.string.isRequired,
-    //image: PropTypes.string.isRequired,
+    image: PropTypes.string.isRequired,
     length: PropTypes.number.isRequired,
     title: PropTypes.string.isRequired
   }).isRequired,
@@ -281,4 +273,4 @@ const styles = StyleSheet.create({
   }
 });
 
-export default withMenuContext(LineItemSong);
+export default withMenuContext(LineItemSongSearch);

@@ -66,7 +66,7 @@ class ModalMusicPlayer extends React.Component {
         />
 
         <View style={gStyle.p3}>
-          <Image source={images[currentSongData.image]} style={styles.image} />
+          <Image source={{uri:currentSongData.image}} style={styles.image} />
 
           <View style={[gStyle.flexRowSpace, styles.containerDetails]}>
             <View style={styles.containerSong}>

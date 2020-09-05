@@ -12,6 +12,8 @@ import { throwIfAudioIsDisabled } from 'expo-av/build/Audio/AudioAvailability';
 
 const cf="favoritesf1.json";
 const rs="recentsearches.json";
+const ip="images.json";
+const cp="cover.json";
 
 export default class App extends React.Component {
   constructor(props) {
@@ -42,7 +44,9 @@ export default class App extends React.Component {
       favorites: [],
       shuffle:true,
       repeat:false,
-      recentseaches:[]
+      recentseaches:[],
+      imagescache:[],
+      covers:[]
     };
 
     this.changeSong = this.changeSong.bind(this);
@@ -60,6 +64,9 @@ export default class App extends React.Component {
     this.prevSong = this.prevSong.bind(this);
     this.onFavoriteapped=this.onFavoriteapped.bind(this);
     this.onaddsearch=this.onaddsearch.bind(this);
+    this.getimagescache=this.getimagescache.bind(this);
+    this.uuidv4 = this.uuidv4.bind(this);
+    this.findimage = this.findimage.bind(this);
   }
    
   async componentDidMount() {
@@ -114,7 +121,32 @@ export default class App extends React.Component {
       var recentseaches = JSON.parse(rsr)
 
 
-      this.setState({ localCache, favorites,recentseaches })
+
+      var ipPath = FileSystem.documentDirectory + ip;
+
+      var fiimagescache = await FileSystem.getInfoAsync(ipPath);
+      if (!fiimagescache.exists) {
+        await FileSystem.writeAsStringAsync(ipPath, "[]");
+      }
+
+      var ipr=await FileSystem.readAsStringAsync(ipPath);
+      var imagescache = JSON.parse(ipr)
+
+
+      
+
+
+      var coPath = FileSystem.documentDirectory + cp;
+
+      var ficover = await FileSystem.getInfoAsync(coPath);
+      if (!ficover.exists) {
+        await FileSystem.writeAsStringAsync(coPath, "[]");
+      }
+
+      var cor=await FileSystem.readAsStringAsync(coPath);
+      var covers = JSON.parse(cor)
+
+      this.setState({ localCache, favorites,recentseaches ,imagescache,covers})
 
     } catch (e) {
       console.log(e)
@@ -123,6 +155,110 @@ export default class App extends React.Component {
     console.log("componentDidMount", this.state.localCache.length)
 
     this.fullfile = FileSystem.documentDirectory + 'tzWd3cVNSC4.mp3';
+  }
+
+
+  async findimage(id){
+    console.log("findimage",id)
+    let {covers} = this.state;
+    if(covers[id]!=null)
+    {
+      return covers[id]
+    }
+    const getMoviesFromApiAsync = async () => {
+      try {
+        //'+this.state.text+'
+        let response = await fetch(
+          'https://coverartarchive.org/release-group/'+id+'?fmt=json', {
+          headers: {
+            'User-Agent': 'dejan app/1.0.0 (dejandjenic@gmail.com)'
+          }
+        }
+        );
+        let json = await response.json();
+        if(response.status!=200){
+          return null;
+        }
+        console.log("image json",json)
+        return json.images.find(x=>x.front).thumbnails.small;
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    let x = await getMoviesFromApiAsync();
+    if(x!=null){
+      covers[id]=x;
+      await this.setState({covers})
+
+
+      var coPath = FileSystem.documentDirectory + cp;
+
+        await FileSystem.writeAsStringAsync(coPath, JSON.stringify(covers));
+
+      return x
+    }
+    else{
+      return null
+    }
+  }
+  
+  uuidv4() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
+  }
+
+  async getimagescache(uri){
+    let {imagescache}=this.state;
+    if(uri==null){
+      return null
+    }
+    console.log("imagescache")
+if(imagescache[uri]!=null){
+  return imagescache[uri]
+}
+else{
+
+
+  const callback = downloadProgress => {
+    const progress = downloadProgress.totalBytesWritten / downloadProgress.totalBytesExpectedToWrite;
+    console.log(progress)
+    this.setState({
+      downloadProgress: progress,
+    }); 
+  }; 
+
+  if (uri != null) {
+
+    var localfile = FileSystem.documentDirectory + this.uuidv4() + ".jpg";
+
+    const downloadResumable = FileSystem.createDownloadResumable(
+      uri,
+      localfile,
+      {},
+      callback
+    );
+
+    try {
+      const { uri } = await downloadResumable.downloadAsync();
+      console.log('Finished downloading to ', uri);
+    } catch (e) {
+      console.error(e);
+    }
+
+
+
+  imagescache[uri] = localfile;
+  
+  var coPath = FileSystem.documentDirectory + ip;
+
+  await FileSystem.writeAsStringAsync(coPath, JSON.stringify(imagescache));
+
+}
+}
+return imagescache[uri]
+    
   }
 
   async onaddsearch(text,add,time){
@@ -551,7 +687,9 @@ this.setState({favorites})
             prevSong:this.prevSong,
             onFavoriteapped:this.onFavoriteapped,
             recentseaches:this.state.recentseaches,
-            onaddsearch:this.onaddsearch
+            onaddsearch:this.onaddsearch,
+            getimagescache:this.getimagescache,
+            findimage:this.findimage
           }}
         />
       </React.Fragment></MenuProvider>

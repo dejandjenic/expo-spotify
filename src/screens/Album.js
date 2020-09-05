@@ -40,6 +40,18 @@ class Album extends React.Component {
     this.performTrackSearch = this.performTrackSearch.bind(this);
     this.itemDownload = this.itemDownload.bind(this);
     this.shufflePlay = this.shufflePlay.bind(this);
+    this.loadalbumimage=this.loadalbumimage.bind(this);
+  }
+
+  async loadalbumimage(albumId){
+    let albumimage=await this.props.screenProps.findimage(albumId)
+    console.log("albumimage",albumimage)
+    albumimage=await this.props.screenProps.getimagescache(albumimage)
+    console.log("albumimage",albumimage)
+    
+    this.setState({
+      albumimage:albumimage
+    });
   }
 
   async componentDidMount() {
@@ -53,7 +65,7 @@ class Album extends React.Component {
     const loadFromUri = navigation.getParam('loadFromUri', true);
     const results = navigation.getParam('results', []);
     const songtoplay = navigation.getParam('songtoplay', null);
-
+    
     this.setState({
       //album: albums[albumTitle] || null,
       album: lalbum,
@@ -62,7 +74,10 @@ class Album extends React.Component {
       songtoplay: songtoplay
     });
     //console.log("lalbum", lalbum)
+    
     if (loadFromUri) {
+      this.loadalbumimage(albumId)
+      
       await this.performTrackSearch(albumId, '')
     }
     else {
@@ -109,7 +124,7 @@ class Album extends React.Component {
       try {
         //'+this.state.text+'
         let response = await fetch(
-          'https://musicbrainz.org/ws/2/release/?release-group=' + id + '&inc=recordings&fmt=json', {
+          'https://musicbrainz.org/ws/2/release/?release-group=' + id + '&inc=recordings+artist-credits&fmt=json', {
           headers: {
             'User-Agent': 'dejan app/1.0.0 (dejandjenic@gmail.com)'
           }
@@ -123,6 +138,7 @@ class Album extends React.Component {
       }
     };
     var trackSearchResults = await getMoviesFromApiAsync();
+    console.log("album data",trackSearchResults)
     this.setState({ trackSearchResults })
 
     var fromcache = trackSearchResults.releases[0].media[0].tracks.filter((item) =>
@@ -187,7 +203,7 @@ class Album extends React.Component {
           ({
             album: this.state.album.title,
             artist: this.state.album.artist,
-            image: 'album.image',
+            image: track.image,
             length: track.length / 1000,
             title: track.title,
             uri: track.id
@@ -207,8 +223,8 @@ class Album extends React.Component {
         .map((track) =>
           ({
             album: this.state.album.title,
-            artist: this.state.album.artist,
-            image: 'album.image',
+            artist: track.artist,
+            image: track.image,
             length: track.length / 1000,
             title: track.title,
             uri: track.id
@@ -234,8 +250,10 @@ class Album extends React.Component {
       navigation,
       screenProps: { toggleTabBarState, setToggleTabBar }
     } = this.props;
-    const { album, downloaded, scrollY, song, title } = this.state; 
-
+    let { album, downloaded, scrollY, song, title } = this.state; 
+if(album!=null){
+    album.image=this.state.albumimage;
+}
     // album data not set?
     if (album === null) {
       return (
@@ -304,7 +322,9 @@ class Album extends React.Component {
             <LinearGradient fill={album.backgroundColor} />
           </View>
           <View style={styles.containerImage}>
-            <Image source={images[album.image]} style={styles.image} />
+            <Image source={{
+              uri: this.state.albumimage?this.state.albumimage:(this.props.screenProps.currentSongData!=null?this.props.screenProps.currentSongData.image:null)
+            }} style={styles.image} />
           </View>
           <View style={styles.containerTitle}>
             <Text ellipsizeMode="tail" numberOfLines={1} style={styles.title}>
@@ -371,11 +391,11 @@ class Album extends React.Component {
                   onfav={this.props.screenProps.onFavorite}
                   songData={{
                     album: album.title,
-                    artist: track.artist,
-                    image: 'album.image',
+                    artist: track.artist?track.artist:(track.recording!=null?track.recording['artist-credit'][0].name:""),
+                    image: track.image?track.image:album.image,
                     length: track.length / 1000,
                     title: track.title,
-                    uri: track.id
+                    uri: track.id,
                   }}
                   favorites={this.props.screenProps.favorites.filter(f=>f.type=="Playlist")}
                   onfavlist={(id,add,data)=> this.props.screenProps.onFavoriteapped(id,add,data)}

@@ -227,7 +227,7 @@ class ModalFavorites extends React.Component {
                   else if (this.state.type == "Playlist") {
                     
                     let ff = item.data.data
-                    .map(x => {return {...x,id:x.uri,data:x}})
+                    .map(x => {return {...x,id:x.uri,data:{...x,length:x.length*1000},length:x.length*1000}})
                     console.log("onPress", item,ff, this.state.type);
                     
                     navigation.navigate('Album', {
