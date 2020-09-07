@@ -64,7 +64,7 @@ class Search extends React.Component {
 
   async itemDownload(id, pdownload) {
     console.log("itemDownload")
-    this.props.screenProps.onDownload(this.state.trackSearchResults.releases[0].media[0].tracks.filter((item) => item.id == id), pdownload);
+    this.props.screenProps.onDownload(this.state.searchResultsTrack.recordings.filter(x=>x.releases[0]['release-group']['secondary-types']==null).filter((item) => item.id == id), pdownload);
   }
 
   changeSong(songData) {
@@ -180,6 +180,20 @@ class Search extends React.Component {
     };
     var searchResultsTrack = await getMoviesFromApiAsync();
     console.log("track search results",searchResultsTrack.recordings.filter(x=>x.releases[0]['release-group']['secondary-types']==null))
+
+    const res = searchResultsTrack.recordings//.filter(x=>x.releases[0]['release-group']['secondary-types']==null)
+     .reduce((acc, curr) => {
+       if(curr!=null && curr.releases.length>0 && curr.releases[0]['release-group']!=null && !acc[curr.releases[0]['release-group'].id]) acc[curr.releases[0]['release-group'].id] = curr; //If this type wasn't previously stored
+       //acc[curr.releases[0]['release-group']].push(curr);
+       return acc; 
+     },{})
+    ;
+
+    
+    console.log("res",res)
+    console.log("searchResultsTrack",searchResultsTrack)
+    console.log("res2",Object.keys(res).map((k) => res[k]))
+    searchResultsTrack.recordings=Object.keys(res).map((k) => res[k]);
     this.setState({ searchResultsTrack })
   }
 
@@ -251,10 +265,10 @@ class Search extends React.Component {
     if (this.state.searchResultsTrack) {
       tracksearch = this.state.searchResultsTrack.recordings.filter(x=>x.releases[0]['release-group']['secondary-types']==null).map((track,index)=>
       <LineItemSongSearch
-      style={{color:colors.white}}
+      style={{color:colors.white}} 
       key={index.toString()}  
 
-      active={this.props.screenProps.currentSongData && this.props.screenProps.currentSongData.title === track.title}
+      active={this.props.screenProps.currentSongData && this.props.screenProps.currentSongData.title === track.title && this.props.screenProps.currentSongData.album === track.releases[0]['release-group'].title}
                   downloaded={this.props.screenProps.localCache.find((x) => x.data.id == track.id) != null}
                   key={index.toString()}
                   onPress={this.changeSong}
@@ -263,6 +277,7 @@ class Search extends React.Component {
                   onfav={this.props.screenProps.onFavorite}
                   songData={{
                     album: track.releases[0]['release-group'].title,
+                    albumid: track.releases[0]['release-group'].id,
                     artist: track['artist-credit'][0].artist.name,
                     image: 'album.image',
                     length: track.length / 1000,
@@ -272,6 +287,8 @@ class Search extends React.Component {
                   favorites={this.props.screenProps.favorites.filter(f=>f.type=="Playlist")}
                   onfavlist={(id,add,data)=> this.props.screenProps.onFavoriteapped(id,add,data)}
                   isinplaylist={this.props.screenProps.favorites.filter(f=>f.type=="Playlist").flatMap(x=>x.data.data).find(x=>x.uri == track.id)!=null}
+                  findimage={this.props.screenProps.findimage}
+                  getimagescache={this.props.screenProps.getimagescache}
     />
     // {item.title} {item['artist-credit'][0].artist.name} {item.releases[0]['release-group'].title}</Text>
       )
@@ -500,7 +517,7 @@ class Search extends React.Component {
           <TouchableOpacity
           onPress={()=>this.setState({searchfor:'artist'})}
           >
-            <Text style={{color:this.state.searchfor=="artist"?colors.yellow:colors.white,fontSize:26}}>Artist</Text>
+            <Text style={{color:this.state.searchfor=="artist"?colors.brandPrimary:colors.white,fontSize:26}}>Artist</Text>
           </TouchableOpacity>
           </View>
 
@@ -519,7 +536,7 @@ class Search extends React.Component {
           <TouchableOpacity
 onPress={()=>this.setState({searchfor:'song'})}
 >
-  <Text style={{color:this.state.searchfor!="artist"?colors.yellow:colors.white,fontSize:26}}>Song</Text>
+  <Text style={{color:this.state.searchfor!="artist"?colors.brandPrimary:colors.white,fontSize:26}}>Song</Text>
 </TouchableOpacity>
 </View>
 </View>

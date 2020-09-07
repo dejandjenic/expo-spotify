@@ -10,7 +10,7 @@ import * as FileSystem from 'expo-file-system';
 import { Audio } from 'expo-av'
 import { throwIfAudioIsDisabled } from 'expo-av/build/Audio/AudioAvailability';
 
-const cf="favoritesf1.json";
+const cf="favorites.json";
 const rs="recentsearches.json";
 const ip="images.json";
 const cp="cover.json";
@@ -175,10 +175,15 @@ export default class App extends React.Component {
           }
         }
         );
-        let json = await response.json();
+
+        console.log("response.status",response.status)
+
         if(response.status!=200){
           return null;
         }
+        let json = await response.json();
+        
+        
         console.log("image json",json)
         return json.images.find(x=>x.front).thumbnails.small;
       } catch (error) {

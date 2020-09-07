@@ -25,11 +25,21 @@ class LineItemSongSearch extends React.Component {
       playlistAction:null
     };
 
-    // this.toggleDownloaded = this.toggleDownloaded.bind(this);
+     this.loadalbumimage = this.loadalbumimage.bind(this);
+  }
+
+  async loadalbumimage(albumId){
+    let albumimage=await this.props.findimage(albumId)
+    console.log("albumimage",albumimage)
+    albumimage=await this.props.getimagescache(albumimage)
+    console.log("albumimage",albumimage)
+    
+    return albumimage;
   }
 
   render() {
-    const { active, downloaded, onPress, songData, onDownload, isfavorite, onfav,onfavlist,ctx,isinplaylist } = this.props;
+    const { active, downloaded, onPress, onDownload, isfavorite, onfav,onfavlist,ctx,isinplaylist } = this.props;
+    let { songData } = this.props;
     let xdata = this.props.favorites;
     
       let xdata2=this.props.favorites.filter(x=>x.data.data.find(y=>y.uri==songData.uri)!=null);
@@ -59,7 +69,7 @@ class LineItemSongSearch extends React.Component {
                 />
               </View>
             )}
-            <Text style={styles.artist}>{songData.artist}</Text>
+            <Text style={styles.artist}>{songData.artist} `{songData.album}`</Text>
           </View>
         </TouchableOpacity>
 
@@ -70,14 +80,7 @@ class LineItemSongSearch extends React.Component {
                 value={downloaded}
               />
       
-      </View>*/}<View style={styles.containerRight}>
-          {/* <TouchableOpacity
-          activeOpacity={gStyle.activeOpacity}
-          onPress={()=> onfav(songData.uri,!isfavorite,'song',songData)}
-          style={styles.containerIcon}
-        >
-          <FontAwesome color={colors.brandPrimary} name={isfavorite ? 'heart' : 'heart-o'} size={20} />
-        </TouchableOpacity> */}
+      </View>*/}<View style={styles.containerRight}>                   
          
             <Dialog
               visible={this.state.dialogvisible}
@@ -101,11 +104,13 @@ class LineItemSongSearch extends React.Component {
                   padding: 50,
                   backgroundColor:colors.black
                 }}
-              >
+              > 
 
                 {
                   (this.state.playlistAction=="add"?xdata:xdata2).map((f,index) =><TouchableOpacity key={index.toString()}
-                      onPress={() => {
+                      onPress={async () => {
+                        var image=await this.loadalbumimage(songData.albumid);
+                        songData.image=image;
                         onfavlist(f.id,this.state.playlistAction=="add",songData)
                         this.setState({ dialogvisible: false });
                       }}
@@ -165,7 +170,9 @@ class LineItemSongSearch extends React.Component {
               <MenuOption style={{padding:20,alignItems:'center'}}>
                 <TouchableOpacity
                   activeOpacity={gStyle.activeOpacity}
-                  onPress={() => {
+                  onPress={async () => {
+                    var image=await this.loadalbumimage(songData.albumid);
+                        songData.image=image;
                     onfav(songData.uri, !isfavorite, 'song', songData);
                     ctx.menuActions.closeMenu();
                 }}
