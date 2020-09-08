@@ -1,5 +1,5 @@
 import React from 'react';
-import { View,StyleSheet,ActivityIndicator, StatusBar } from 'react-native';
+import { View,StyleSheet,ActivityIndicator, StatusBar, Vibration, Platform } from 'react-native';
 import { AppLoading } from 'expo';
 import { func,colors } from './src/constants';
 import { MenuProvider } from 'react-native-popup-menu';
@@ -10,10 +10,17 @@ import * as FileSystem from 'expo-file-system';
 import { Audio } from 'expo-av'
 import { throwIfAudioIsDisabled } from 'expo-av/build/Audio/AudioAvailability';
 
+
+import Constants from 'expo-constants';
+import * as Notifications from 'expo-notifications';
+import * as Permissions from 'expo-permissions';
+import { Notifications as Notifications2 } from 'expo';
+
 const cf="favorites.json";
 const rs="recentsearches.json";
 const ip="images.json";
 const cp="cover.json";
+
 
 export default class App extends React.Component {
   constructor(props) {
@@ -68,6 +75,8 @@ export default class App extends React.Component {
     this.uuidv4 = this.uuidv4.bind(this);
     this.findimage = this.findimage.bind(this);
     this.setisloading = this.setisloading.bind(this);
+    this.registerForPushNotificationsAsync = this.registerForPushNotificationsAsync.bind(this);
+    this._handleNotification = this._handleNotification.bind(this);
   }
    
   async componentDidMount() {
@@ -156,12 +165,58 @@ export default class App extends React.Component {
     console.log("componentDidMount", this.state.localCache.length)
 
     this.fullfile = FileSystem.documentDirectory + 'tzWd3cVNSC4.mp3';
+
+    this.registerForPushNotificationsAsync();
+    this._notificationSubscription = Notifications2.addListener(this._handleNotification);
   }
 
   setisloading(param){
     console.log("is loading",param)
     this.setState({ isSongLoading: param });
   }
+
+  registerForPushNotificationsAsync = async () => {
+    console.log("registerForPushNotificationsAsync")
+    if (Constants.isDevice) {
+      const { status: existingStatus } = await Permissions.getAsync(Permissions.NOTIFICATIONS);
+      let finalStatus = existingStatus;
+      if (existingStatus !== 'granted') {
+        const { status } = await Permissions.askAsync(Permissions.NOTIFICATIONS);
+        finalStatus = status;
+      }
+      if (finalStatus !== 'granted') {
+        alert('Failed to get push token for push notification!');
+        return;
+      }
+      let token = await Notifications2.getExpoPushTokenAsync();
+      console.log(token);
+      this.setState({ expoPushToken: token });
+    } else {
+      alert('Must use physical device for Push Notifications');
+    }
+
+    if (Platform.OS === 'android') {
+      Notifications2.createChannelAndroidAsync('default', {
+        name: 'default',
+        sound: true,
+        priority: 'max',
+        vibrate: [0, 250, 250, 250],
+      });
+    }
+  };
+
+  _handleNotification = notification => {
+    
+    console.log(notification);
+    
+    if(notification.data.type=="register"){
+      Notifications2.dismissNotificationAsync(notification.notificationId)
+    }
+    else{
+      Vibration.vibrate();
+      this.setState({ notification: notification });
+    }
+  };
 
   async findimage(id){
     console.log("findimage",id)
