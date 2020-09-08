@@ -44,11 +44,12 @@ class Album extends React.Component {
   }
 
   async loadalbumimage(albumId){
+    this.props.screenProps.setisloading(true)
     let albumimage=await this.props.screenProps.findimage(albumId)
     console.log("albumimage",albumimage)
     albumimage=await this.props.screenProps.getimagescache(albumimage)
     console.log("albumimage",albumimage)
-    
+    this.props.screenProps.setisloading(false)
     this.setState({
       albumimage:albumimage
     });

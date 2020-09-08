@@ -289,6 +289,7 @@ class Search extends React.Component {
                   isinplaylist={this.props.screenProps.favorites.filter(f=>f.type=="Playlist").flatMap(x=>x.data.data).find(x=>x.uri == track.id)!=null}
                   findimage={this.props.screenProps.findimage}
                   getimagescache={this.props.screenProps.getimagescache}
+                  setisloading = {this.props.screenProps.setisloading}
     />
     // {item.title} {item['artist-credit'][0].artist.name} {item.releases[0]['release-group'].title}</Text>
       )

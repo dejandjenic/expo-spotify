@@ -67,6 +67,7 @@ export default class App extends React.Component {
     this.getimagescache=this.getimagescache.bind(this);
     this.uuidv4 = this.uuidv4.bind(this);
     this.findimage = this.findimage.bind(this);
+    this.setisloading = this.setisloading.bind(this);
   }
    
   async componentDidMount() {
@@ -157,6 +158,10 @@ export default class App extends React.Component {
     this.fullfile = FileSystem.documentDirectory + 'tzWd3cVNSC4.mp3';
   }
 
+  setisloading(param){
+    console.log("is loading",param)
+    this.setState({ isSongLoading: param });
+  }
 
   async findimage(id){
     console.log("findimage",id)
@@ -331,15 +336,17 @@ this.setState({favorites})
     
     let { favorites } = this.state;
     console.log("favorites",favorites)
-    //console.log("onFavorite", favorites)
+    //console.log("onFavorite", favorites) 
 
       if (favorites.find((x) => x.id == id) != null) {
-        let thefav = favorites.find((x) => x.id == id);
+        console.log("onFavoritelist", "found")
+        let thefav = favorites.find((x) => x.id == id); 
         if(add){
 thefav.data.data.push(data);
         }
         else{
-          thefav.data.data=thefav.data.data.filter(x=>x.id!=data.id)
+          console.log("onFavoritelist", "remove")
+          thefav.data.data=thefav.data.data.filter(x=>x.uri!=data.uri)
         }
       }
     
@@ -694,7 +701,8 @@ this.setState({favorites})
             recentseaches:this.state.recentseaches,
             onaddsearch:this.onaddsearch,
             getimagescache:this.getimagescache,
-            findimage:this.findimage
+            findimage:this.findimage,
+            setisloading:this.setisloading
           }}
         />
       </React.Fragment></MenuProvider>

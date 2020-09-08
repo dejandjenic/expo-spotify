@@ -29,11 +29,12 @@ class LineItemSongSearch extends React.Component {
   }
 
   async loadalbumimage(albumId){
+    this.props.setisloading(true)
     let albumimage=await this.props.findimage(albumId)
     console.log("albumimage",albumimage)
     albumimage=await this.props.getimagescache(albumimage)
     console.log("albumimage",albumimage)
-    
+    this.props.setisloading(false)
     return albumimage;
   }
 
