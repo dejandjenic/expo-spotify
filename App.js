@@ -406,14 +406,14 @@ thefav.data.data.push(data);
       }
     
     //console.log("onFavorite", favorites)
-this.setState({favorites})
+this.setState({favorites}) 
     var fPath = FileSystem.documentDirectory + cf;
 
     await FileSystem.writeAsStringAsync(fPath, JSON.stringify(favorites));
 
   }
 
-  async onDownload(data, download) {
+  async onDownload(data, download,externalProgressCallback) {
 
 
     const callback = downloadProgress => {
@@ -422,6 +422,9 @@ this.setState({favorites})
       this.setState({
         downloadProgress: progress,
       }); 
+      if(externalProgressCallback!=null){
+        externalProgressCallback(progress)
+      }
     }; 
 
     var localCache = this.state.localCache;

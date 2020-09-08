@@ -15,6 +15,7 @@ import {
 } from 'react-native-popup-menu';
 
 import Dialog, { SlideAnimation, DialogContent, DialogFooter, DialogButton, DialogTitle } from 'react-native-popup-dialog';
+import * as Progress from 'react-native-progress';
 
 class LineItemSong extends React.Component {
   constructor(props) {
@@ -22,7 +23,8 @@ class LineItemSong extends React.Component {
 
     this.state = {
       dialogvisible: false,
-      playlistAction:null
+      playlistAction:null,
+      downloadProgress:null
     };
 
     // this.toggleDownloaded = this.toggleDownloaded.bind(this);
@@ -67,7 +69,11 @@ class LineItemSong extends React.Component {
                 />
               </View>
             )}
-            <Text style={styles.artist}>{songData.artist}</Text>
+            <Text style={styles.artist}>{songData.artist}</Text>            
+            {this.state.downloadProgress!=null?
+            <Progress.Bar style={{marginLeft:20}} height={5} progress={this.state.downloadProgress} width={100} />
+            :null}
+          
           </View>
         </TouchableOpacity>
 
@@ -161,7 +167,10 @@ class LineItemSong extends React.Component {
 <TouchableOpacity
                   activeOpacity={gStyle.activeOpacity}
                   onPress={() => {
-                    onDownload(songData.uri, !downloaded);
+                    onDownload(songData.uri, !downloaded,(p)=>{
+                      console.log("external progress")
+                      this.setState({downloadProgress:(p==1?null:p)}) 
+                    });
                     ctx.menuActions.closeMenu();}
                   }
                   style={styles.containerIcon}

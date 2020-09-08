@@ -112,9 +112,9 @@ class Album extends React.Component {
     console.log("trackSearchResults",trackSearchResults)
   }
 
-  async itemDownload(id, pdownload) {
+  async itemDownload(id, pdownload,externalprogresscallback) {
     console.log("itemDownload")
-    this.props.screenProps.onDownload(this.state.trackSearchResults.releases[0].media[0].tracks.filter((item) => item.id == id), pdownload);
+    this.props.screenProps.onDownload(this.state.trackSearchResults.releases[0].media[0].tracks.filter((item) => item.id == id), pdownload,externalprogresscallback);
   }
 
   async performTrackSearch(id, name) {
